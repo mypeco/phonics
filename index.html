@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>フォニックスカード</title>
     
-    <!-- 共通：フォントとデザインの読み込み -->
-    <!-- UDフォント (BIZ UDPGothic) に変更 -->
     <link href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Noto+Color+Emoji&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
@@ -78,7 +76,7 @@
         
         .no-select { user-select: none; -webkit-user-select: none; }
         
-        ruby { font-family: 'BIZ UDPGothic', sans-serif; display: inline-flex; flex-direction: column; align-items: center; }
+        ruby { font-family: 'BIZ UDPGothic', sans-serif; }
         rt { font-size: 0.6em; line-height: 1.2; font-weight: normal; color: #64748b; margin-bottom: -0.2em; }
         
         /* Magic E アニメーション */
@@ -102,17 +100,26 @@
             pointer-events: none;
         }
 
-        /* カードのスタイル調整（CSS側でも念のため定義） */
+        /* カードのスタイル調整 */
         .letter-box {
             display: flex;
             align-items: center;
             justify-content: center;
             font-weight: 700;
-            border-radius: 20px; /* 角丸を強化 */
+            border-radius: 16px; 
             transition: all 0.3s ease;
             box-shadow: 0 4px 0 rgba(0,0,0,0.1);
             position: relative;
             overflow: hidden;
+        }
+
+        /* モーダルアニメーション */
+        @keyframes modal-in {
+            from { opacity: 0; transform: scale(0.95) translateY(10px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+        .animate-modal-in {
+            animation: modal-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         /* モーダル用 */
@@ -125,17 +132,122 @@
 
     <div id="app" class="min-h-screen flex flex-col"></div>
 
-    <!-- モーダル群 -->
-    <div id="tipsModal" class="modal"><div class="modal-content bg-white rounded-3xl p-6 shadow-2xl border-l-8 border-yellow-400 max-h-[90vh] overflow-y-auto"><div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">💡 ここが ポイント！</h2><button onclick="closeModal('tipsModal')" class="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="x" class="w-8 h-8"></i></button></div><div id="tipsContent" class="space-y-4"></div><button onclick="closeModal('tipsModal')" class="mt-8 w-full bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl transform hover:scale-105 transition shadow-lg text-lg">わかった！</button></div></div>
-    <div id="parentModal" class="modal"><div class="modal-content bg-white rounded-3xl p-6 shadow-2xl border-l-8 border-purple-500 max-h-[90vh] overflow-y-auto"><div class="flex justify-between items-center mb-6"><h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">📘 保護者・教育者の方へ</h2><button onclick="closeModal('parentModal')" class="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"><i data-lucide="x" class="w-8 h-8"></i></button></div><div class="space-y-8"><section><h3 class="text-lg font-bold text-purple-700 mb-3 border-b-2 border-purple-200 pb-1">📚 このアプリの学習カテゴリ</h3><div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm"><div class="bg-blue-50 p-3 rounded-lg border border-blue-200"><h4 class="font-bold text-blue-700 mb-1">CVC（基本）</h4><p class="text-slate-600">子音+母音+子音の3文字単語。<br>真ん中の母音（a, i, u, e, o）を聞き分けます。</p></div><div class="bg-purple-50 p-3 rounded-lg border border-purple-200"><h4 class="font-bold text-purple-700 mb-1">Magic E</h4><p class="text-slate-600">末尾のEが前の母音の名前読みに変える魔法。<br>名前読み（エイ、アイ...）を聞き分けます。</p></div><div class="bg-green-50 p-3 rounded-lg border border-green-200"><h4 class="font-bold text-green-700 mb-1">Digraphs（2文字子音など）</h4><p class="text-slate-600">2文字で1つの音を作るルール。<br>子音（sh, ch...）、母音（ee, ai...）、へんしん（ou, oi...）の3種類があります。</p></div><div class="bg-orange-50 p-3 rounded-lg border border-orange-200"><h4 class="font-bold text-orange-700 mb-1">Blends（子音連結）</h4><p class="text-slate-600">子音が連続して混ざり合う音。<br>bl, st などの音の響きに慣れます。</p></div></div></section><section class="bg-yellow-50 p-5 rounded-lg border border-yellow-200"><h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><span class="text-2xl">⚠️</span> アルファベット読み・ローマ字との混乱について</h3><p class="text-gray-700 text-sm mb-4 leading-relaxed">今回の問題には「Magic E（名前読み）」なども含まれます。基本のフォニックス読み（ア・エ・イ・オ・ア）と混同しやすいポイントですので、正解後に出るヒントのアニメーションを活用して「音のイメージ」を掴ませてあげてください。</p></section></div><button onclick="closeModal('parentModal')" class="mt-8 w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-xl transform hover:scale-105 transition shadow-lg">閉じる</button></div></div>
-    <div id="welcomeModal" class="modal"><div class="modal-content bg-white rounded-3xl p-8 shadow-2xl border-4 border-orange-200 max-h-[90vh] overflow-y-auto"><div class="text-center space-y-6"><h3 class="text-3xl font-black text-orange-500 flex items-center justify-center gap-2"><i data-lucide="megaphone" class="w-8 h-8"></i> たいせつな おしらせ</h3><div class="bg-orange-50 p-6 rounded-2xl border-2 border-orange-200 text-left space-y-4 text-slate-700 font-bold text-lg leading-relaxed"><p>「えいごの おと には、いろんな ルール が あります！」</p><p>まずは この アプリで、よく でてくる <span class="text-orange-600 text-xl font-black">『おたすけ ルール』</span> を おぼえていこう！</p><p>ルールを まもらない レアキャラ <span class="text-purple-600">『わんぱく ことば』</span> も いっぱい いるんだけど、この アプリには でてこないから、あんしんしてね😊</p><p class="text-center text-xl text-orange-600 mt-4 border-t-2 border-orange-200 pt-4 border-dashed">まずは ルールどおりの カード を あつめて、<br>マスターに なっちゃおう！✨</p></div><button onclick="closeModal('welcomeModal')" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-black py-4 px-6 rounded-2xl shadow-lg transform hover:scale-105 transition text-2xl">はーい！</button></div></div></div>
+    <div id="tipsModal" class="modal">
+        <div class="modal-content bg-white rounded-3xl p-6 shadow-2xl border-l-8 border-yellow-400 max-h-[90vh] overflow-y-auto animate-modal-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">💡 ここが ポイント！</h2>
+                <button onclick="closeModal('tipsModal')" class="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                    <i data-lucide="x" class="w-8 h-8"></i>
+                </button>
+            </div>
+            <div id="tipsContent" class="space-y-4"></div>
+            <button onclick="closeModal('tipsModal')" class="mt-8 w-full bg-yellow-400 hover:bg-yellow-500 text-white font-bold py-3 px-4 rounded-xl transform hover:scale-105 transition shadow-lg text-lg">わかった！</button>
+        </div>
+    </div>
+
+    <div id="helpModal" class="modal">
+        <div class="modal-content bg-white rounded-3xl p-6 shadow-2xl border-4 border-indigo-100 max-h-[90vh] overflow-y-auto animate-modal-in max-w-md mx-auto mt-20">
+            <div class="text-center mb-6">
+                <div class="inline-block p-3 rounded-full bg-indigo-100 text-indigo-500 mb-2">
+                    <i data-lucide="book-open" class="w-8 h-8"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-slate-700">あそびかた</h2>
+            </div>
+            <div class="space-y-6">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
+                    <h3 class="font-bold text-indigo-600 mb-2 flex items-center gap-2">
+                        <i data-lucide="mouse-pointer-2" class="w-5 h-5"></i> 
+                        <ruby>選<rt>えら</rt></ruby>ぼう
+                    </h3>
+                    <p class="text-sm font-bold text-slate-600 leading-relaxed">
+                        <ruby>音<rt>おと</rt></ruby>をきいて、ただしいボタンをおしてね。<br>
+                        キーボードの <span class="bg-white px-1 border rounded text-xs">A</span> <span class="bg-white px-1 border rounded text-xs">I</span> <span class="bg-white px-1 border rounded text-xs">U</span> <span class="bg-white px-1 border rounded text-xs">E</span> <span class="bg-white px-1 border rounded text-xs">O</span> でも えらべるよ！
+                    </p>
+                </div>
+                <div class="bg-green-50 p-4 rounded-xl border border-green-100">
+                    <h3 class="font-bold text-green-600 mb-2 flex items-center gap-2">
+                        <i data-lucide="keyboard" class="w-5 h-5"></i> 
+                        2<ruby>文字<rt>もじ</rt></ruby>のとき
+                    </h3>
+                    <p class="text-sm font-bold text-slate-600 leading-relaxed">
+                        「sh」などは、キーボードで<br>
+                        <span class="bg-white px-1 border rounded text-xs">s</span> のあとに <span class="bg-white px-1 border rounded text-xs">h</span> をおしてね！
+                    </p>
+                </div>
+                <div class="bg-amber-50 p-4 rounded-xl border border-amber-100">
+                    <h3 class="font-bold text-amber-600 mb-2 flex items-center gap-2">
+                        <i data-lucide="crown" class="w-5 h-5"></i> 
+                        スタンプゲット
+                    </h3>
+                    <p class="text-sm font-bold text-slate-600 leading-relaxed">
+                        90<ruby>点<rt>てん</rt></ruby><ruby>以上<rt>いじょう</rt></ruby>を <span class="text-amber-600 text-lg">3<ruby>回<rt>かい</rt></ruby></span>とると、<br>
+                        <ruby>特別<rt>とくべつ</rt></ruby>なスタンプがもらえるよ！
+                    </p>
+                </div>
+                <div class="bg-red-50 p-4 rounded-xl border border-red-100">
+                    <h3 class="font-bold text-red-600 mb-2 flex items-center gap-2">
+                        <i data-lucide="flame" class="w-5 h-5"></i> 
+                        チャレンジBOX
+                    </h3>
+                    <p class="text-sm font-bold text-slate-600 leading-relaxed">
+                        <ruby>間違<rt>まちが</rt></ruby>えた<ruby>問題<rt>もんだい</rt></ruby>は BOXにたまるよ。<br>
+                        ぜんぶ やっつけよう！
+                    </p>
+                </div>
+            </div>
+            <button onclick="closeModal('helpModal')" class="mt-6 w-full bg-indigo-500 hover:bg-indigo-600 text-white font-bold py-3 px-4 rounded-xl transform hover:scale-105 transition shadow-lg text-lg">わかった！</button>
+        </div>
+    </div>
+
+    <div id="parentModal" class="modal">
+        <div class="modal-content bg-white rounded-3xl p-6 shadow-2xl border-l-8 border-purple-500 max-h-[90vh] overflow-y-auto animate-modal-in">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-bold text-gray-800 flex items-center gap-2">📘 保護者・教育者の方へ</h2>
+                <button onclick="closeModal('parentModal')" class="p-2 rounded-full hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors">
+                    <i data-lucide="x" class="w-8 h-8"></i>
+                </button>
+            </div>
+            <div class="space-y-8">
+                <section>
+                    <h3 class="text-lg font-bold text-purple-700 mb-3 border-b-2 border-purple-200 pb-1">📚 このアプリの学習カテゴリ</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
+                        <div class="bg-blue-50 p-3 rounded-lg border border-blue-200"><h4 class="font-bold text-blue-700 mb-1">CVC（基本）</h4><p class="text-slate-600">子音+母音+子音の3文字単語。<br>真ん中の母音（a, i, u, e, o）を聞き分けます。</p></div>
+                        <div class="bg-purple-50 p-3 rounded-lg border border-purple-200"><h4 class="font-bold text-purple-700 mb-1">Magic E</h4><p class="text-slate-600">末尾のEが前の母音の名前読みに変える魔法。<br>名前読み（エイ、アイ...）を聞き分けます。</p></div>
+                        <div class="bg-green-50 p-3 rounded-lg border border-green-200"><h4 class="font-bold text-green-700 mb-1">Digraphs（2文字子音など）</h4><p class="text-slate-600">2文字で1つの音を作るルール。<br>子音（sh, ch...）、母音（ee, ai...）、へんしん（ou, oi...）の3種類があります。</p></div>
+                        <div class="bg-orange-50 p-3 rounded-lg border border-orange-200"><h4 class="font-bold text-orange-700 mb-1">Blends（子音連結）</h4><p class="text-slate-600">子音が連続して混ざり合う音。<br>bl, st などの音の響きに慣れます。</p></div>
+                    </div>
+                </section>
+                <section class="bg-yellow-50 p-5 rounded-lg border border-yellow-200">
+                    <h3 class="text-lg font-bold text-gray-800 mb-3 flex items-center gap-2"><span class="text-2xl">⚠️</span> アルファベット読み・ローマ字との混乱について</h3>
+                    <p class="text-gray-700 text-sm mb-4 leading-relaxed">今回の問題には「Magic E（名前読み）」なども含まれます。基本のフォニックス読み（ア・エ・イ・オ・ア）と混同しやすいポイントですので、正解後に出るヒントのアニメーションを活用して「音のイメージ」を掴ませてあげてください。</p>
+                </section>
+            </div>
+            <button onclick="closeModal('parentModal')" class="mt-8 w-full bg-slate-500 hover:bg-slate-600 text-white font-bold py-3 px-4 rounded-xl transform hover:scale-105 transition shadow-lg">閉じる</button>
+        </div>
+    </div>
+
+    <div id="welcomeModal" class="modal">
+        <div class="modal-content bg-white rounded-3xl p-8 shadow-2xl border-4 border-orange-200 max-h-[90vh] overflow-y-auto animate-modal-in">
+            <div class="text-center space-y-6">
+                <h3 class="text-3xl font-black text-orange-500 flex items-center justify-center gap-2"><i data-lucide="megaphone" class="w-8 h-8"></i> たいせつな おしらせ</h3>
+                <div class="bg-orange-50 p-6 rounded-2xl border-2 border-orange-200 text-left space-y-4 text-slate-700 font-bold text-lg leading-relaxed">
+                    <p>「えいごの おと には、いろんな ルール が あります！」</p>
+                    <p>まずは この アプリで、よく でてくる <span class="text-orange-600 text-xl font-black">『おたすけ ルール』</span> を おぼえていこう！</p>
+                    <p>ルールを まもらない レアキャラ <span class="text-purple-600">『わんぱく ことば』</span> も いっぱい いるんだけど、この アプリには でてこないから、あんしんしてね😊</p>
+                    <p class="text-center text-xl text-orange-600 mt-4 border-t-2 border-orange-200 pt-4 border-dashed">まずは ルールどおりの カード を あつめて、<br>マスターに なっちゃおう！✨</p>
+                </div>
+                <button onclick="closeModal('welcomeModal')" class="w-full bg-orange-500 hover:bg-orange-600 text-white font-black py-4 px-6 rounded-2xl shadow-lg transform hover:scale-105 transition text-2xl">はーい！</button>
+            </div>
+        </div>
+    </div>
 
     <script>
-        // ==========================================
+
+// ==========================================
         // 定数・データ定義
         // ==========================================
 
-        const APP_ID = 'cvc_flash_kids_v6'; 
+        const APP_ID = 'cvc_flash_kids_v7'; // バージョンアップ
         const DATA_KEY = `${APP_ID}_data`;
         const USERS_KEY = `${APP_ID}_users`;
         const HISTORY_LIMIT = 50;
@@ -277,8 +389,6 @@
             ]
         };
 
-        // アプリ内で使うカテゴリ定義
-        // ★修正: 安全なアクセスのために (RAW_DATA.key || []).slice(...) を使用
         const DATA = {
             cvc_1: { id: 'cvc_1', label: 'ポン・ポン・ポン ①', bgIcon: '🐱', color: 'from-blue-400 to-cyan-500', items: (RAW_DATA.cvc || []).slice(0, 10), mode: 'vowel' },
             cvc_2: { id: 'cvc_2', label: 'ポン・ポン・ポン ②', bgIcon: '🐶', color: 'from-blue-500 to-indigo-500', items: (RAW_DATA.cvc || []).slice(10, 20), mode: 'vowel' },
@@ -331,7 +441,6 @@
             }
         ];
 
-        // TIPSや設定は前回と同じ
         const TIPS_CONTENT = {
             cvc: `<div class="bg-blue-50 p-4 rounded-xl border border-blue-200"><h4 class="font-bold text-blue-700 text-lg mb-2">まんなかの「母音（ぼいん）」に ちゅうもく！</h4><p class="mb-2 text-slate-700">みじかく、はっきりした おと だよ。</p><div class="grid grid-cols-5 gap-2 text-center font-bold mb-4"><div class="bg-white p-2 rounded shadow-sm">a<br><span class="text-red-500">ア</span></div><div class="bg-white p-2 rounded shadow-sm">e<br><span class="text-blue-500">エ</span></div><div class="bg-white p-2 rounded shadow-sm">i<br><span class="text-green-500">イ</span></div><div class="bg-white p-2 rounded shadow-sm">o<br><span class="text-orange-500">オ</span></div><div class="bg-white p-2 rounded shadow-sm">u<br><span class="text-purple-500">ア</span></div></div><div class="bg-purple-100 p-3 rounded-lg border border-purple-200 text-purple-800 text-sm font-bold flex items-start gap-2"><i data-lucide="info" class="w-5 h-5 shrink-0"></i><span><span class="text-lg">u</span> という もじは、<br>ローマ字の「ウ」だけじゃなくて<br><span class="text-red-500 text-lg">「ア」</span>って おしゃべりするんだよ！</span></div></div>`,
             digraphs: `<div class="space-y-4"><div class="bg-green-50 p-4 rounded-xl border border-green-200"><h4 class="font-bold text-green-700 text-lg mb-2">子音（しいん）の なかよしチーム！</h4><ul class="space-y-2 text-slate-700 font-bold"><li class="flex items-start gap-2"><span class="bg-white px-2 rounded border border-green-200 text-green-600">sh</span> <span>くち に ゆび を あてる「シーッ」🤫</span></li><li class="flex items-start gap-2"><span class="bg-white px-2 rounded border border-green-200 text-green-600">ch</span> <span>はじける おと「チェッ」🚂</span></li><li class="flex items-start gap-2"><span class="bg-white px-2 rounded border border-green-200 text-green-600">th</span> <span>した を まえば で すこし「はさむ」おと👅</span></li><li class="flex items-start gap-2"><span class="bg-white px-2 rounded border border-green-200 text-green-600">wh</span> <span>ろうそく を「フッ」と ふく おと🕯️</span></li></ul></div><div class="bg-blue-50 p-4 rounded-xl border border-blue-200"><h4 class="font-bold text-blue-700 text-lg mb-2">母音（ぼいん）の なかよしチーム！</h4><p class="text-sm font-bold text-slate-600 mb-2">2つ くっつくと、おとが かわるよ。</p><ul class="space-y-2 text-slate-700 font-bold"><li class="flex items-start gap-2"><span class="bg-white px-2 rounded border border-blue-200 text-blue-600">ee / ai</span> <span>なまえよみ（イー、エイ…）になる！</span></li><li class="flex items-start gap-2"><span class="bg-white px-2 rounded border border-blue-200 text-blue-600">ou / oi</span> <span>おくちの かたちが かわる「へんしん」のおと！</span></li></ul></div></div>`,
@@ -339,17 +448,44 @@
             blends: `<div class="bg-orange-50 p-4 rounded-xl border border-orange-200"><h4 class="font-bold text-orange-700 text-lg mb-2">2つの おとが なかよし！🤝</h4><p class="font-bold text-slate-700 mb-4">2つの 子音（しいん）を、すばやく つなげて 言ってみよう！</p><ul class="space-y-2 text-slate-700 font-bold bg-white p-3 rounded-lg border border-orange-100"><li class="flex items-center gap-2"><span class="text-xl text-orange-500 w-8 text-center">bl</span> <span>ブ・ル → <span class="text-orange-600">ブルー</span></span></li><li class="flex items-center gap-2"><span class="text-xl text-orange-500 w-8 text-center">st</span> <span>ス・ト → <span class="text-orange-600">ストップ</span></span></li><li class="flex items-center gap-2"><span class="text-xl text-orange-500 w-8 text-center">cr</span> <span>ク・ル → <span class="text-orange-600">クラブ</span></span></li></ul></div>`
         };
 
-        let gameState = { currentCategory: null, questionIndex: 0, quizItems: [], isCorrect: false, correctCount: 0, userAnswer: '', phase: 'question', wrongAnswers: [] };
+        // ==========================================
+        // 2. 状態管理 (Global State) & 3. 音声処理
+        // ==========================================
 
-        const ICON_OPTIONS = ['🐶', '🐱', '🐰', '🐻', '🐼', '🐨', '🐯', '🦁', '🚗', '🚀', '✈️', '🚂', '🚓', '🚑', '⚽', '⚾', '🏀', '🎾', '🍎', '🍓', '🍒', '🍇', '🍉', '☀️', '🌙', '🌟', '❄️', '🌈', '👑', '💎', '🎀', '🎵'];
-        const STAMP_OPTIONS = ['💖', '🎀', '🌸', '🍭', '🦄', '🐰', '🐣', '🦋', '🌷', '🍓', '🔥', '⚡', '🚀', '🦖', '🦁', '🦅', '🐉', '🎮', '⚽', '🏎️', '👑', '💎', '🏆', '💯', '🌟', '🌈', '🎊', '🥇', '🦸', '🧞', '🍔', '🍟', '🍕', '🍜', '🍣', '🍙', '🍰', '🍩', '🍦', '🍪', '🍫', '🐶', '🐱', '🐹', '🦊', '🐼', '🐨', '🐧', '🐢', '🐬', '🐳', '🐘'];
-        const COLOR_OPTIONS = [ { label: 'Blue', class: 'bg-blue-100 text-blue-700' }, { label: 'Pink', class: 'bg-pink-100 text-pink-700' }, { label: 'Amber', class: 'bg-amber-100 text-amber-700' }, { label: 'Green', class: 'bg-green-100 text-green-700' }, { label: 'Purple', class: 'bg-purple-100 text-purple-700' }, { label: 'Teal', class: 'bg-teal-100 text-teal-700' } ];
+        let gameState = { 
+            currentCategory: null, 
+            questionIndex: 0, 
+            quizItems: [], 
+            isCorrect: false, 
+            correctCount: 0, 
+            userAnswer: '', 
+            phase: 'question', 
+            wrongAnswers: [],
+            // 新規追加: チャレンジモードかどうか
+            isChallengeMode: false
+        };
 
-        let state = { users: [], allUsersData: {}, currentUserId: null, screen: 'userSelect', isSoundOn: true, editingUser: {}, resultInfo: null };
+        // 入力バッファ（2文字キーボード入力用）
+        let inputBuffer = '';
+        let inputTimeout = null;
+
+        let state = { 
+            users: [], 
+            allUsersData: {}, 
+            currentUserId: null, 
+            screen: 'userSelect', 
+            isSoundOn: true, 
+            editingUser: {}, 
+            resultInfo: null 
+        };
 
         const AudioContext = window.AudioContext || window.webkitAudioContext;
         let audioCtx = new AudioContext();
-        function initAudio() { if (audioCtx.state === 'suspended') audioCtx.resume(); }
+
+        function initAudio() { 
+            if (audioCtx.state === 'suspended') audioCtx.resume(); 
+        }
+
         function playTone(type) {
             if (!state.isSoundOn) return;
             initAudio();
@@ -358,77 +494,218 @@
             osc.connect(gain);
             gain.connect(audioCtx.destination);
             const now = audioCtx.currentTime;
+
             switch (type) {
-                case 'tap': osc.type = 'sine'; osc.frequency.setValueAtTime(800, now); osc.frequency.exponentialRampToValueAtTime(100, now + 0.08); gain.gain.setValueAtTime(0.15, now); gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08); osc.start(now); osc.stop(now + 0.08); break;
-                case 'correct': osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now + 0.1); osc.frequency.setValueAtTime(783.99, now + 0.2); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.6); osc.start(now); osc.stop(now + 0.6); break;
-                case 'error': osc.type = 'sawtooth'; osc.frequency.setValueAtTime(150, now); osc.frequency.linearRampToValueAtTime(100, now + 0.2); gain.gain.setValueAtTime(0.2, now); gain.gain.linearRampToValueAtTime(0, now + 0.2); osc.start(now); osc.stop(now + 0.2); break;
-                case 'complete': osc.type = 'triangle'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(659.25, now + 0.15); osc.frequency.setValueAtTime(783.99, now + 0.30); osc.frequency.setValueAtTime(1046.50, now + 0.45); gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 0.8); osc.start(now); osc.stop(now + 0.8); break;
-                case 'perfect': osc.type = 'square'; osc.frequency.setValueAtTime(523.25, now); osc.frequency.setValueAtTime(523.25, now + 0.12); osc.frequency.setValueAtTime(523.25, now + 0.24); osc.frequency.setValueAtTime(783.99, now + 0.36); osc.frequency.setValueAtTime(659.25, now + 0.60); osc.frequency.setValueAtTime(783.99, now + 0.72); osc.frequency.setValueAtTime(1046.50, now + 0.84); gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 2.0); osc.start(now); osc.stop(now + 2.0); break;
-                case 'crown': osc.type = 'triangle'; osc.frequency.setValueAtTime(1046.50, now); osc.frequency.setValueAtTime(1318.51, now + 0.1); osc.frequency.setValueAtTime(1567.98, now + 0.2); osc.frequency.setValueAtTime(2093.00, now + 0.4); gain.gain.setValueAtTime(0.1, now); gain.gain.linearRampToValueAtTime(0, now + 1.0); osc.start(now); osc.stop(now + 1.0); break;
-                case 'stamp': osc.type = 'sine'; osc.frequency.setValueAtTime(200, now); osc.frequency.exponentialRampToValueAtTime(600, now + 0.1); gain.gain.setValueAtTime(0.5, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15); osc.start(now); osc.stop(now + 0.15); break;
+                case 'tap': 
+                    osc.type = 'sine'; 
+                    osc.frequency.setValueAtTime(800, now); 
+                    osc.frequency.exponentialRampToValueAtTime(100, now + 0.08); 
+                    gain.gain.setValueAtTime(0.15, now); 
+                    gain.gain.exponentialRampToValueAtTime(0.001, now + 0.08); 
+                    osc.start(now); 
+                    osc.stop(now + 0.08); 
+                    break;
+                case 'correct': 
+                    osc.type = 'triangle'; 
+                    osc.frequency.setValueAtTime(523.25, now); 
+                    osc.frequency.setValueAtTime(659.25, now + 0.1); 
+                    osc.frequency.setValueAtTime(783.99, now + 0.2); 
+                    gain.gain.setValueAtTime(0.2, now); 
+                    gain.gain.linearRampToValueAtTime(0, now + 0.6); 
+                    osc.start(now); 
+                    osc.stop(now + 0.6); 
+                    break;
+                case 'error': 
+                    osc.type = 'sawtooth'; 
+                    osc.frequency.setValueAtTime(150, now); 
+                    osc.frequency.linearRampToValueAtTime(100, now + 0.2); 
+                    gain.gain.setValueAtTime(0.2, now); 
+                    gain.gain.linearRampToValueAtTime(0, now + 0.2); 
+                    osc.start(now); 
+                    osc.stop(now + 0.2); 
+                    break;
+                case 'complete': 
+                    osc.type = 'triangle'; 
+                    osc.frequency.setValueAtTime(523.25, now); 
+                    osc.frequency.setValueAtTime(659.25, now + 0.15); 
+                    osc.frequency.setValueAtTime(783.99, now + 0.30); 
+                    osc.frequency.setValueAtTime(1046.50, now + 0.45); 
+                    gain.gain.setValueAtTime(0.1, now); 
+                    gain.gain.linearRampToValueAtTime(0, now + 0.8); 
+                    osc.start(now); 
+                    osc.stop(now + 0.8); 
+                    break;
+                case 'perfect': 
+                    osc.type = 'square'; 
+                    osc.frequency.setValueAtTime(523.25, now); 
+                    osc.frequency.setValueAtTime(523.25, now + 0.12); 
+                    osc.frequency.setValueAtTime(523.25, now + 0.24); 
+                    osc.frequency.setValueAtTime(783.99, now + 0.36); 
+                    osc.frequency.setValueAtTime(659.25, now + 0.60); 
+                    osc.frequency.setValueAtTime(783.99, now + 0.72); 
+                    osc.frequency.setValueAtTime(1046.50, now + 0.84); 
+                    gain.gain.setValueAtTime(0.1, now); 
+                    gain.gain.linearRampToValueAtTime(0, now + 2.0); 
+                    osc.start(now); 
+                    osc.stop(now + 2.0); 
+                    break;
+                case 'crown': 
+                    osc.type = 'triangle'; 
+                    osc.frequency.setValueAtTime(1046.50, now); 
+                    osc.frequency.setValueAtTime(1318.51, now + 0.1); 
+                    osc.frequency.setValueAtTime(1567.98, now + 0.2); 
+                    osc.frequency.setValueAtTime(2093.00, now + 0.4); 
+                    gain.gain.setValueAtTime(0.1, now); 
+                    gain.gain.linearRampToValueAtTime(0, now + 1.0); 
+                    osc.start(now); 
+                    osc.stop(now + 1.0); 
+                    break;
+                case 'stamp': 
+                    osc.type = 'sine'; 
+                    osc.frequency.setValueAtTime(200, now); 
+                    osc.frequency.exponentialRampToValueAtTime(600, now + 0.1); 
+                    gain.gain.setValueAtTime(0.5, now); 
+                    gain.gain.exponentialRampToValueAtTime(0.01, now + 0.15); 
+                    osc.start(now); 
+                    osc.stop(now + 0.15); 
+                    break;
             }
         }
+
         function speak(text) {
             window.speechSynthesis.cancel();
             const utterance = new SpeechSynthesisUtterance(text);
             utterance.lang = 'en-US';
-            utterance.rate = 0.7;
+            utterance.rate = 0.7; // 少しゆっくり
             window.speechSynthesis.speak(utterance);
         }
 
+        // ==========================================
+        // 4. ロジック & ヘルパー
+        // ==========================================
+
         function initData() {
             const savedUsers = localStorage.getItem(USERS_KEY);
-            if (savedUsers) state.users = JSON.parse(savedUsers);
+            if (savedUsers) {
+                state.users = JSON.parse(savedUsers);
+            }
             const savedData = localStorage.getItem(DATA_KEY);
-            if (savedData) state.allUsersData = JSON.parse(savedData);
+            if (savedData) {
+                state.allUsersData = JSON.parse(savedData);
+            }
         }
-        function saveUsers() { localStorage.setItem(USERS_KEY, JSON.stringify(state.users)); }
-        function saveData() { localStorage.setItem(DATA_KEY, JSON.stringify(state.allUsersData)); }
-        function updateScreen(screenName) { state.screen = screenName; render(); }
-        function toggleSound() { state.isSoundOn = !state.isSoundOn; initAudio(); render(); }
 
-        function selectUser(userId) { playTone('tap'); initAudio(); state.currentUserId = userId; updateScreen('home'); }
-        function startEditUser() { playTone('tap'); state.editingUser = { name: '', icon: ICON_OPTIONS[0], color: COLOR_OPTIONS[0].class }; updateScreen('userEdit'); }
+        function saveUsers() {
+            localStorage.setItem(USERS_KEY, JSON.stringify(state.users));
+        }
+
+        function saveData() {
+            localStorage.setItem(DATA_KEY, JSON.stringify(state.allUsersData));
+        }
+
+        function updateScreen(screenName) {
+            state.screen = screenName;
+            // ヘルプモーダルなどは閉じる
+            closeModal('helpModal');
+            closeModal('tipsModal');
+            render();
+        }
+
+        function toggleSound() {
+            state.isSoundOn = !state.isSoundOn;
+            initAudio();
+            render();
+        }
+
+        // ユーザー管理
+        function selectUser(userId) {
+            playTone('tap');
+            initAudio();
+            state.currentUserId = userId;
+            // データ構造の初期化確認（チャレンジリストなど）
+            if (!state.allUsersData[userId].challengeWords) {
+                state.allUsersData[userId].challengeWords = [];
+                saveData();
+            }
+            updateScreen('home');
+        }
+
+        function startEditUser() {
+            playTone('tap');
+            state.editingUser = { name: '', icon: ICON_OPTIONS[0], color: COLOR_OPTIONS[0].class };
+            updateScreen('userEdit');
+        }
+
         function updateEditingName(val) { 
             state.editingUser.name = val; 
             const btn = document.getElementById('saveUserBtn');
             if (btn) {
-                if (val) { btn.disabled = false; btn.classList.remove('bg-slate-300'); btn.classList.add('bg-indigo-500', 'hover:bg-indigo-600', 'shadow-md', 'transform', 'hover:-translate-y-1'); }
-                else { btn.disabled = true; btn.classList.add('bg-slate-300'); btn.classList.remove('bg-indigo-500', 'hover:bg-indigo-600', 'shadow-md', 'transform', 'hover:-translate-y-1'); }
+                if (val) {
+                    btn.disabled = false;
+                    btn.classList.remove('bg-slate-300');
+                    btn.classList.add('bg-indigo-500', 'hover:bg-indigo-600', 'shadow-md', 'transform', 'hover:-translate-y-1');
+                } else {
+                    btn.disabled = true;
+                    btn.classList.add('bg-slate-300');
+                    btn.classList.remove('bg-indigo-500', 'hover:bg-indigo-600', 'shadow-md', 'transform', 'hover:-translate-y-1');
+                }
             }
         }
         function updateEditingIcon(icon) { state.editingUser.icon = icon; render(); }
         function updateEditingColor(color) { state.editingUser.color = color; render(); }
+
         function saveUserEdit() {
             if (!state.editingUser.name) return;
             playTone('correct');
+            
             let isNew = false;
-            if (state.editingUser.id) { state.users = state.users.map(u => u.id === state.editingUser.id ? state.editingUser : u); }
-            else { 
+            if (state.editingUser.id) {
+                state.users = state.users.map(u => u.id === state.editingUser.id ? state.editingUser : u);
+            } else {
                 isNew = true;
-                const newUser = { ...state.editingUser, id: Date.now().toString() }; 
-                state.users.push(newUser); 
-                state.allUsersData[newUser.id] = { history: [], progress: {} }; 
-                saveData(); 
+                const newUser = { ...state.editingUser, id: Date.now().toString() };
+                state.users.push(newUser);
+                state.allUsersData[newUser.id] = { history: [], progress: {}, challengeWords: [] };
+                saveData();
             }
-            saveUsers(); 
+            saveUsers();
             updateScreen('userSelect');
-            if (isNew) { setTimeout(() => openModal('welcomeModal'), 100); }
+            
+            if (isNew) {
+                setTimeout(() => openModal('welcomeModal'), 100);
+            }
         }
+
         function deleteUser(userId) {
             if (!confirm('このユーザーと、きろくを さくじょしますか？')) return;
-            playTone('remove'); state.users = state.users.filter(u => u.id !== userId); delete state.allUsersData[userId]; saveUsers(); saveData(); render();
+            playTone('remove');
+            state.users = state.users.filter(u => u.id !== userId);
+            delete state.allUsersData[userId];
+            saveUsers();
+            saveData();
+            render();
         }
+
         function clearHistory() {
             if (!confirm('ほんとうに きろくを ぜんぶ けしますか？')) return;
-            state.allUsersData[state.currentUserId].history = []; saveData(); playTone('remove'); render();
+            state.allUsersData[state.currentUserId].history = [];
+            saveData();
+            playTone('remove');
+            render();
         }
+
+        // スタンプ＆ヒント
         function getStamp(stamp) {
             const user = state.allUsersData[state.currentUserId];
             const catId = gameState.currentCategory;
-            if (user.progress[catId]) { user.progress[catId].stamp = stamp; }
-            saveData(); playTone('stamp'); updateScreen('stampBook');
+            if (user.progress[catId]) {
+                user.progress[catId].stamp = stamp;
+            }
+            saveData();
+            playTone('stamp');
+            updateScreen('stampBook');
         }
+
         function showTips(tipsKey) {
             const content = TIPS_CONTENT[tipsKey];
             if (content) {
@@ -438,107 +715,193 @@
             }
         }
 
+        // モーダル制御
+        function openModal(modalId) { document.getElementById(modalId).classList.add('show'); }
+        function closeModal(modalId) { document.getElementById(modalId).classList.remove('show'); }
+        window.onclick = function(event) { if (event.target.classList.contains('modal')) event.target.classList.remove('show'); }
+
+// ==========================================
+        // 5. 定数 & ゲームロジック
+        // ==========================================
+
+        const ICON_OPTIONS = ['🐶', '🐱', '🐰', '🐻', '🐼', '🐨', '🐯', '🦁', '🚗', '🚀', '✈️', '🚂', '🚓', '🚑', '⚽', '⚾', '🏀', '🎾', '🍎', '🍓', '🍒', '🍇', '🍉', '☀️', '🌙', '🌟', '❄️', '🌈', '👑', '💎', '🎀', '🎵'];
+        const STAMP_OPTIONS = ['💖', '🎀', '🌸', '🍭', '🦄', '🐰', '🐣', '🦋', '🌷', '🍓', '🔥', '⚡', '🚀', '🦖', '🦁', '🦅', '🐉', '🎮', '⚽', '🏎️', '👑', '💎', '🏆', '💯', '🌟', '🌈', '🎊', '🥇', '🦸', '🧞', '🍔', '🍟', '🍕', '🍜', '🍣', '🍙', '🍰', '🍩', '🍦', '🍪', '🍫', '🐶', '🐱', '🐹', '🦊', '🐼', '🐨', '🐧', '🐢', '🐬', '🐳', '🐘'];
+        const COLOR_OPTIONS = [ { label: 'Blue', class: 'bg-blue-100 text-blue-700' }, { label: 'Pink', class: 'bg-pink-100 text-pink-700' }, { label: 'Amber', class: 'bg-amber-100 text-amber-700' }, { label: 'Green', class: 'bg-green-100 text-green-700' }, { label: 'Purple', class: 'bg-purple-100 text-purple-700' }, { label: 'Teal', class: 'bg-teal-100 text-teal-700' } ];
+
         function startCategory(catId) {
             playTone('tap');
             gameState.currentCategory = catId;
             gameState.questionIndex = 0;
             gameState.correctCount = 0;
             gameState.wrongAnswers = [];
+            gameState.isChallengeMode = false; // 通常モード
+            
             const cat = DATA[catId];
             const sourceItems = cat.items;
+            // シャッフル
             const quizItems = (cat.shuffle === false) ? [...sourceItems] : [...sourceItems].sort(() => Math.random() - 0.5);
             gameState.quizItems = quizItems; 
+            
             gameState.phase = 'question';
             gameState.userAnswer = '';
+            inputBuffer = ''; // 入力バッファリセット
+            
             updateScreen('game');
+            setTimeout(() => { speak(quizItems[0].w); }, 500);
+        }
+
+        // ★新機能：チャレンジモード開始
+        function startChallengeMode() {
+            playTone('tap');
+            const user = state.allUsersData[state.currentUserId];
+            const challengeList = user.challengeWords || [];
+            
+            if (challengeList.length === 0) return;
+
+            gameState.currentCategory = 'challenge'; // 仮ID
+            gameState.questionIndex = 0;
+            gameState.correctCount = 0;
+            gameState.wrongAnswers = []; // 今回間違えたらここに入る（あとで統合）
+            gameState.isChallengeMode = true;
+
+            // チャレンジ用の一時カテゴリデータを作成
+            DATA['challenge'] = {
+                id: 'challenge',
+                label: '🔥 チャレンジBOX',
+                color: 'from-red-500 to-orange-500',
+                items: challengeList,
+                mode: 'mixed' // 混合モード（表示側で対応が必要）
+            };
+
+            // ランダムに出題
+            gameState.quizItems = [...challengeList].sort(() => Math.random() - 0.5);
+            
+            gameState.phase = 'question';
+            gameState.userAnswer = '';
+            inputBuffer = '';
+            
+            updateScreen('game');
+            setTimeout(() => { speak(gameState.quizItems[0].w); }, 500);
         }
 
         function normalizeVowel(v) {
-            // この関数は主にCVCや通常モードでの使用を想定
-            // フレームモードでは handleAnswer 内で個別に比較するためあまり使われないが、互換性のために残す
             if (v.length === 1) return v;
-            if (v === 'ea') return 'a'; 
-            const valid = [
-                'a','e','i','o','u','s','c','t','w','h','y','k','n','p',
-                'sh','ch','th','wh','ng','ck','ph','wr','kn',
-                'ea','ie','ue','ay','ey','ow','ai','oa','ee',
-                'ou','au','aw','oi','oy','oo','ew'
-            ];
-            if (valid.includes(v)) return v;
-            return v.charAt(0);
+            // 短縮入力対応（ea -> a 扱いなど）のロジックは、今回は完全一致判定を優先するため簡易化
+            return v; 
         }
 
         function handleAnswer(ans) {
             if (gameState.phase !== 'question') return;
+            
             const currentItem = gameState.quizItems[gameState.questionIndex];
-            const cat = DATA[gameState.currentCategory];
+            const cat = DATA[gameState.currentCategory]; // チャレンジモードの場合は動的データ
             gameState.userAnswer = ans;
             
             let isCorrect = false;
 
-            // 正解判定ロジックの分岐
-            if (cat.mode === 'digraph_v1_frame') {
-                // 母音ダイグラフ①：正解は center の1文字目（例: ea -> e）
-                // ただし、データセットの ans プロパティには既に正解の1文字が入っている前提で設計
-                // RAW_DATA.digraphs_v1 を修正したので ans プロパティと比較する
-                isCorrect = (ans === currentItem.ans);
-            } else if (cat.mode === 'blends_1_frame' || cat.mode === 'blends_2_frame') {
-                // Blends (フレーム)：正解は ans プロパティ（穴あき文字）
+            // --- 【修正ここから】 ---
+            
+            // モードごとの正解判定
+            // チャレンジモード(mixed) または フレームモードの場合は .ans を正解とする
+            if (cat.mode === 'mixed' || (cat.mode && cat.mode.includes('frame'))) {
                 isCorrect = (ans === currentItem.ans);
             } else {
-                // 既存ロジック
-                isCorrect = (ans === normalizeVowel(currentItem.v));
+                // それ以外（通常モードのCVCなど）
+                // データ定義の .v と比較
+                isCorrect = (ans === currentItem.v);
             }
-
+            
             if (isCorrect) {
                 playTone('correct');
                 gameState.correctCount++;
+                
+                // ★チャレンジモードなら、正解した単語を「克服リスト」から削除
+                if (gameState.isChallengeMode) {
+                    const user = state.allUsersData[state.currentUserId];
+                    // w (単語) が一致するものを削除
+                    user.challengeWords = user.challengeWords.filter(w => w.w !== currentItem.w);
+                    saveData();
+                }
+
             } else {
                 playTone('error');
-                gameState.wrongAnswers.push({
-                    word: currentItem.w,
-                    jp: currentItem.nm,
-                    correct: currentItem.v,
-                    answer: ans
-                });
+                // 間違えた問題を記録
+                gameState.wrongAnswers.push(currentItem);
             }
+            
             gameState.phase = 'feedback';
-            render();
+            render(); // 画面更新（アニメーション表示）
+            
+            // 少し遅れて発音
             setTimeout(() => { speak(currentItem.w); }, 300);
         }
 
         function nextQuestion() {
             playTone('tap');
+            inputBuffer = ''; // バッファクリア
+            
+            // チャレンジモードで、リストが空になった（全問正解して消えた）場合などの制御
+            if (gameState.isChallengeMode) {
+                const user = state.allUsersData[state.currentUserId];
+                // まだ問題が残っているか？（今回のセッションの問題数ではなく、実データの方）
+                // ただし、ゲーム進行としては quizItems を最後までやりきる形にする
+            }
+
             if (gameState.questionIndex + 1 < gameState.quizItems.length) {
                 gameState.questionIndex++;
                 gameState.phase = 'question';
                 gameState.userAnswer = '';
                 render();
+                setTimeout(() => { speak(gameState.quizItems[gameState.questionIndex].w); }, 500);
             } else {
                 finishGame();
             }
         }
 
         function finishGame() {
-            playTone('complete');
             const total = gameState.quizItems.length;
             const score = Math.round((gameState.correctCount / total) * 100);
-            const isPerfect = (score === 100);
+            
+            // ★合格ラインを90点に変更
+            const isPass = (score >= 90); 
+            
+            if (isPass) {
+                playTone('perfect');
+            } else {
+                playTone('complete');
+            }
+
             const now = new Date();
             const today = now.toLocaleDateString('ja-JP') + ' ' + now.toLocaleTimeString('ja-JP', {hour: '2-digit', minute:'2-digit'});
             const user = state.allUsersData[state.currentUserId];
             
-            user.history.unshift({ date: today, categoryId: gameState.currentCategory, isPerfect, score, correctCount: gameState.correctCount, total });
-            
-            // ★修正: 履歴データが壊れている場合の安全対策
-            if (Array.isArray(user.history) && user.history.length > HISTORY_LIMIT) {
-                user.history = user.history.slice(0, HISTORY_LIMIT);
+            // 履歴保存
+            if (!gameState.isChallengeMode) {
+                user.history.unshift({ date: today, categoryId: gameState.currentCategory, isPass, score, correctCount: gameState.correctCount, total });
+                if (user.history.length > HISTORY_LIMIT) user.history = user.history.slice(0, HISTORY_LIMIT);
+            }
+
+            // ★チャレンジリストへの追加（通常モードで間違えた場合）
+            if (!gameState.isChallengeMode && gameState.wrongAnswers.length > 0) {
+                if (!user.challengeWords) user.challengeWords = [];
+                
+                gameState.wrongAnswers.forEach(wrongItem => {
+                    // 重複チェック
+                    const exists = user.challengeWords.some(item => item.w === wrongItem.w);
+                    if (!exists) {
+                        user.challengeWords.push(wrongItem);
+                    }
+                });
             }
 
             let canGetStamp = false;
             const catId = gameState.currentCategory;
-            if (isPerfect) {
+
+            // スタンプ判定（通常モードかつ合格時）
+            if (!gameState.isChallengeMode && isPass) {
                 if (!user.progress[catId]) user.progress[catId] = { perfectCount: 0, stamp: null };
+                
+                // まだスタンプを持っていない場合
                 if (!user.progress[catId].stamp) {
                     user.progress[catId].perfectCount += 1;
                     if (user.progress[catId].perfectCount >= 3) {
@@ -547,91 +910,469 @@
                     }
                 }
             } else {
-                if (!user.progress[catId]) user.progress[catId] = { perfectCount: 0, stamp: null };
+                // 不合格でもプログレスデータは作っておく
+                if (!gameState.isChallengeMode && !user.progress[catId]) {
+                    user.progress[catId] = { perfectCount: 0, stamp: null };
+                }
             }
+            
             saveData();
-            state.resultInfo = { isPerfect, canGetStamp, score, correctCount: gameState.correctCount, total };
+            state.resultInfo = { isPass, canGetStamp, score, correctCount: gameState.correctCount, total };
             updateScreen('result');
         }
 
-        function getButtonColor(val) {
-            const map = {
-                'a': { border: 'border-red-500', hover: 'hover:bg-red-50', text: 'text-red-600' },
-                'e': { border: 'border-blue-500', hover: 'hover:bg-blue-50', text: 'text-blue-600' },
-                'i': { border: 'border-green-500', hover: 'hover:bg-green-50', text: 'text-green-600' },
-                'o': { border: 'border-orange-500', hover: 'hover:bg-orange-50', text: 'text-orange-600' },
-                'u': { border: 'border-purple-500', hover: 'hover:bg-purple-50', text: 'text-purple-600' },
-                's': { border: 'border-indigo-500', hover: 'hover:bg-indigo-50', text: 'text-indigo-600' },
-                't': { border: 'border-pink-500', hover: 'hover:bg-pink-50', text: 'text-pink-600' },
-                'c': { border: 'border-yellow-500', hover: 'hover:bg-yellow-50', text: 'text-yellow-600' },
-                'w': { border: 'border-teal-500', hover: 'hover:bg-teal-50', text: 'text-teal-600' },
-                'h': { border: 'border-slate-500', hover: 'hover:bg-slate-50', text: 'text-slate-600' },
-                'k': { border: 'border-lime-500', hover: 'hover:bg-lime-50', text: 'text-lime-600' },
-                'n': { border: 'border-emerald-500', hover: 'hover:bg-emerald-50', text: 'text-emerald-600' },
-                'y': { border: 'border-sky-500', hover: 'hover:bg-sky-50', text: 'text-sky-600' },
-                'p': { border: 'border-fuchsia-500', hover: 'hover:bg-fuchsia-50', text: 'text-fuchsia-600' },
-                'r': { border: 'border-amber-500', hover: 'hover:bg-amber-50', text: 'text-amber-600' },
-                'l': { border: 'border-cyan-500', hover: 'hover:bg-cyan-50', text: 'text-cyan-600' },
-                'm': { border: 'border-rose-500', hover: 'hover:bg-rose-50', text: 'text-rose-600' }
-            };
-            return map[val] || { border: 'border-gray-400', hover: 'hover:bg-gray-100', text: 'text-gray-700' };
-        }
+        // ==========================================
+        // キーボード入力リスナー (New!)
+        // ==========================================
+        window.addEventListener('keydown', (e) => {
+            if (state.screen !== 'game') return;
+            
+            // フィードバック画面で Enter or Space -> 次へ
+            if (gameState.phase === 'feedback') {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    nextQuestion();
+                }
+                return;
+            }
 
-        function openModal(modalId) { document.getElementById(modalId).classList.add('show'); }
-        function closeModal(modalId) { document.getElementById(modalId).classList.remove('show'); }
-        window.onclick = function(event) { if (event.target.classList.contains('modal')) event.target.classList.remove('show'); }
+            // 問題画面
+            if (gameState.phase === 'question') {
+                // スペースキーで読み上げリピート
+                if (e.key === ' ') {
+                    e.preventDefault();
+                    const currentItem = gameState.quizItems[gameState.questionIndex];
+                    speak(currentItem.w);
+                    return;
+                }
+
+                // アルファベット入力処理
+                if (e.key.length === 1 && e.key.match(/[a-zA-Z]/)) {
+                    const inputChar = e.key.toLowerCase();
+                    
+                    // バッファに追加
+                    inputBuffer += inputChar;
+                    
+                    // バッファリセット用タイマー（1.5秒入力がないとリセット）
+                    if (inputTimeout) clearTimeout(inputTimeout);
+                    inputTimeout = setTimeout(() => { inputBuffer = ''; }, 1500);
+
+                    // 現在のカテゴリの選択肢を取得
+                    // ※renderGame内で生成している choices 配列と同じロジックが必要
+                    // 簡易的にDATAから推測する
+                    const cat = DATA[gameState.currentCategory];
+                    let validChoices = [];
+                    
+                    if (cat.id === 'challenge') {
+                        // チャレンジモードの場合、現在の問題の正解の長さに合わせるなどの柔軟性が必要だが
+                        // 一旦、現在の問題の正解値(v)を持つリストと仮定するか、
+                        // 画面上のボタンから取得するのが確実だが、ここではロジックで対応
+                        const currentItem = gameState.quizItems[gameState.questionIndex];
+                        validChoices = [currentItem.v]; // 正解は最低限含む
+                    } else {
+                        // 通常モード：DATA定義から選択肢候補を推測
+                        // ここはrenderGameのロジックと同期させる必要がありますが、
+                        // ユーザー入力が「正解」または「不正解」のいずれかの選択肢にマッチするか判定します
+                        
+                        // 入力されたバッファが、有効な選択肢（正解・不正解問わず）と一致するかチェック
+                        // 簡易実装：入力バッファが 1文字 または 2文字 になった時点で判定を試みる
+                    }
+
+                    // 入力判定ロジック
+                    const currentItem = gameState.quizItems[gameState.questionIndex];
+                    // その問題の正解（ans）の文字数を見る
+                    const targetLength = currentItem.ans.length;
+
+                    if (targetLength === 1) {
+                        // 1文字の答えなら、即判定
+                        handleAnswer(inputChar);
+                        inputBuffer = ''; 
+                    } else {
+                        // 2文字以上の答えなら、バッファがその長さになったら判定
+                        if (inputBuffer.length >= targetLength) {
+                            handleAnswer(inputBuffer);
+                            inputBuffer = '';
+                        }
+                    }
+                }
+            }
+        });
+
+// ==========================================
+        // 6. レンダリング関数 (View)
+        // ==========================================
 
         const app = document.getElementById('app');
+
         function render() {
             app.innerHTML = '';
+            
+            // 現在のユーザーデータを取得
             const currentUser = state.users.find(u => u.id === state.currentUserId);
-            const userProgress = (state.currentUserId && state.allUsersData[state.currentUserId]) ? state.allUsersData[state.currentUserId].progress : {};
-            if (state.screen === 'userSelect') renderUserSelect();
-            else if (state.screen === 'userEdit') renderUserEdit();
-            else if (state.screen === 'home') renderHome(currentUser, userProgress);
-            else if (state.screen === 'stampBook') renderStampBook(userProgress);
-            else if (state.screen === 'history') renderHistory();
-            else if (state.screen === 'result') renderResult(currentUser, userProgress);
-            else if (state.screen === 'stampSelect') renderStampSelect();
-            else if (state.screen === 'game') renderGame(currentUser); 
+            const userData = (state.currentUserId && state.allUsersData[state.currentUserId]) 
+                ? state.allUsersData[state.currentUserId] 
+                : { progress: {}, history: [], challengeWords: [] };
+            
+            // チャレンジリストの初期化確認
+            if (!userData.challengeWords) userData.challengeWords = [];
+
+            if (state.screen === 'userSelect') {
+                renderUserSelect();
+            } else if (state.screen === 'userEdit') {
+                renderUserEdit();
+            } else if (state.screen === 'home') {
+                renderHome(currentUser, userData.progress, userData.challengeWords);
+            } else if (state.screen === 'stampBook') {
+                renderStampBook(userData.progress);
+            } else if (state.screen === 'history') {
+                renderHistory();
+            } else if (state.screen === 'game') {
+                renderGame(currentUser);
+            } else if (state.screen === 'result') {
+                renderResult(currentUser, userData.progress);
+            } else if (state.screen === 'stampSelect') {
+                renderStampSelect();
+            }
+
+            // アイコン描画
             lucide.createIcons();
         }
 
         function renderUserSelect() {
-            let html = `<div class="min-h-screen bg-slate-50 p-4 flex items-center justify-center w-full"><div class="max-w-md w-full"><header class="mb-10 text-center relative"><div class="absolute right-0 top-0"><button onclick="toggleSound()" class="p-2 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 transition-colors"><i data-lucide="${state.isSoundOn ? 'volume-2' : 'volume-x'}" class="w-5 h-5"></i></button></div><h1 class="text-3xl font-bold text-indigo-600 mb-2 flex items-center justify-center gap-2 pt-2"><i data-lucide="sparkles" class="w-8 h-8 text-yellow-400 fill-yellow-400"></i>フォニックス<br>フラッシュカード</h1><p class="text-slate-500 font-bold">だれが あそぶ？</p></header><div class="grid gap-4">`;
-            state.users.forEach(user => { html += `<div class="relative group"><button onclick="selectUser('${user.id}')" class="w-full p-4 pr-12 rounded-3xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1 text-left ${user.color} flex items-center gap-4 border-b-4 border-black/10 active:border-b-0 active:translate-y-1"><div class="text-4xl bg-white/50 w-16 h-16 rounded-full flex items-center justify-center shadow-inner flex-shrink-0">${user.icon}</div><div class="flex-1 min-w-0"><div class="text-xl font-bold truncate">${user.name}</div><div class="text-xs opacity-80 font-bold mt-1">Let's Play!</div></div><i data-lucide="arrow-right" class="w-6 h-6 opacity-60"></i></button><button onclick="deleteUser('${user.id}')" class="absolute -top-2 -right-2 p-2 bg-white text-slate-400 hover:text-red-500 rounded-full shadow-sm border border-slate-200 opacity-0 group-hover:opacity-100 transition-opacity"><i data-lucide="trash-2" class="w-4 h-4"></i></button></div>`; });
-            if (state.users.length < 3) { html += `<button onclick="startEditUser()" class="w-full p-6 rounded-3xl border-4 border-dashed border-slate-300 text-slate-400 flex flex-col items-center justify-center gap-2 hover:bg-slate-100 hover:border-slate-400 transition-all group"><div class="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center group-hover:bg-slate-300 transition-colors"><i data-lucide="plus" class="w-6 h-6"></i></div><span class="font-bold">あたらしく つくる</span></button>`; } else { html += `<p class="text-center text-xs text-slate-400 mt-2 font-bold">※ 3にん まで つくれるよ</p>`; }
-            html += `</div><div class="mt-8 text-center"><button onclick="openModal('parentModal')" class="bg-white border-2 border-purple-500 text-purple-600 hover:bg-purple-50 text-sm font-bold px-6 py-3 rounded-xl shadow transform hover:scale-105 transition flex items-center gap-2 mx-auto"><i data-lucide="book-open" class="w-4 h-4"></i> 保護者・教育者の方へ</button></div></div></div>`; app.innerHTML = html;
+            let html = `
+            <div class="min-h-screen bg-slate-50 p-4 flex items-center justify-center w-full">
+                <div class="max-w-md w-full">
+                    <header class="mb-10 text-center relative">
+                        <div class="absolute right-0 top-0">
+                            <button onclick="toggleSound()" class="p-2 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-600 transition-colors">
+                                <i data-lucide="${state.isSoundOn ? 'volume-2' : 'volume-x'}" class="w-5 h-5"></i>
+                            </button>
+                        </div>
+                        <h1 class="text-3xl font-bold text-indigo-600 mb-2 flex items-center justify-center gap-2 pt-2">
+                            <i data-lucide="sparkles" class="w-8 h-8 text-yellow-400 fill-yellow-400"></i>
+                            フォニックス<br>フラッシュカード
+                        </h1>
+                        <p class="text-slate-500 font-bold">だれが あそぶ？</p>
+                    </header>
+                    <div class="grid gap-4">`;
+
+            state.users.forEach(user => {
+                html += `
+                <div class="relative group">
+                    <button onclick="selectUser('${user.id}')" class="w-full p-4 pr-12 rounded-3xl shadow-md hover:shadow-lg transition-all transform hover:-translate-y-1 text-left ${user.color} flex items-center gap-4 border-b-4 border-black/10 active:border-b-0 active:translate-y-1">
+                        <div class="text-4xl bg-white/50 w-16 h-16 rounded-full flex items-center justify-center shadow-inner flex-shrink-0">
+                            ${user.icon}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xl font-bold truncate">${user.name}</div>
+                            <div class="text-xs opacity-80 font-bold mt-1">Let's Play!</div>
+                        </div>
+                        <i data-lucide="arrow-right" class="w-6 h-6 opacity-60"></i>
+                    </button>
+                    <button onclick="deleteUser('${user.id}')" class="absolute -top-2 -right-2 p-2 bg-white text-slate-400 hover:text-red-500 rounded-full shadow-sm border border-slate-200 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                </div>`;
+            });
+
+            if (state.users.length < 3) {
+                html += `
+                <button onclick="startEditUser()" class="w-full p-6 rounded-3xl border-4 border-dashed border-slate-300 text-slate-400 flex flex-col items-center justify-center gap-2 hover:bg-slate-100 hover:border-slate-400 transition-all group">
+                    <div class="w-12 h-12 rounded-full bg-slate-200 flex items-center justify-center group-hover:bg-slate-300 transition-colors">
+                        <i data-lucide="plus" class="w-6 h-6"></i>
+                    </div>
+                    <span class="font-bold">あたらしく つくる</span>
+                </button>`;
+            } else {
+                html += `<p class="text-center text-xs text-slate-400 mt-2 font-bold">※ 3にん まで つくれるよ</p>`;
+            }
+
+            html += `
+                    </div>
+                    <div class="mt-8 text-center">
+                        <button onclick="openModal('parentModal')" class="bg-white border-2 border-purple-500 text-purple-600 hover:bg-purple-50 text-sm font-bold px-6 py-3 rounded-xl shadow transform hover:scale-105 transition flex items-center gap-2 mx-auto">
+                            <i data-lucide="book-open" class="w-4 h-4"></i> 保護者・教育者の方へ
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+            app.innerHTML = html;
         }
+
         function renderUserEdit() {
             const u = state.editingUser;
-            let html = `<div class="min-h-screen bg-slate-50 p-4 flex items-center justify-center w-full"><div class="max-w-md w-full bg-white rounded-3xl p-6 shadow-xl border-4 border-slate-100"><h2 class="text-2xl font-bold text-center mb-6 text-slate-700">${u.id ? 'へんしゅう' : 'あたらしく つくる'}</h2><div class="space-y-6"><div><label class="block text-sm font-bold text-slate-400 mb-2">なまえ</label><input type="text" id="userNameInput" value="${u.name || ''}" class="w-full text-2xl font-bold p-3 rounded-xl border-2 border-slate-200 focus:border-indigo-400 outline-none text-center" placeholder="なまえをいれてね" oninput="updateEditingName(this.value)"></div><div><label class="block text-sm font-bold text-slate-400 mb-2">アイコン</label><div class="flex flex-wrap gap-2 justify-center max-h-40 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-100">${ICON_OPTIONS.map(icon => `<button onclick="updateEditingIcon('${icon}')" class="w-12 h-12 text-3xl flex items-center justify-center rounded-lg transition-all ${u.icon === icon ? 'bg-white shadow-md scale-110 border-2 border-indigo-400' : 'hover:bg-white hover:shadow-sm'}">${icon}</button>`).join('')}</div></div><div><label class="block text-sm font-bold text-slate-400 mb-2">いろ</label><div class="flex flex-wrap gap-3 justify-center">${COLOR_OPTIONS.map(c => `<button onclick="updateEditingColor('${c.class}')" class="w-10 h-10 rounded-full border-2 ${c.class.split(' ')[0]} ${u.color === c.class ? 'ring-4 ring-offset-2 ring-indigo-200 scale-110 border-indigo-500' : 'border-transparent opacity-70'}"></button>`).join('')}</div></div><div class="flex gap-3 pt-4"><button onclick="updateScreen('userSelect'); playTone('tap')" class="flex-1 py-3 rounded-xl bg-slate-200 text-slate-600 font-bold">やめる</button><button id="saveUserBtn" onclick="saveUserEdit()" class="flex-1 py-3 rounded-xl text-white font-bold transition-all ${u.name ? 'bg-indigo-500 hover:bg-indigo-600 shadow-md transform hover:-translate-y-1' : 'bg-slate-300'}" ${!u.name ? 'disabled' : ''}>けってい</button></div></div></div></div>`; app.innerHTML = html;
+            let html = `
+            <div class="min-h-screen bg-slate-50 p-4 flex items-center justify-center w-full">
+                <div class="max-w-md w-full bg-white rounded-3xl p-6 shadow-xl border-4 border-slate-100">
+                    <h2 class="text-2xl font-bold text-center mb-6 text-slate-700">${u.id ? 'へんしゅう' : 'あたらしく つくる'}</h2>
+                    <div class="space-y-6">
+                        <div>
+                            <label class="block text-sm font-bold text-slate-400 mb-2">なまえ</label>
+                            <input type="text" id="userNameInput" value="${u.name || ''}" class="w-full text-2xl font-bold p-3 rounded-xl border-2 border-slate-200 focus:border-indigo-400 outline-none text-center" placeholder="なまえをいれてね" oninput="updateEditingName(this.value)">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-400 mb-2">アイコン</label>
+                            <div class="flex flex-wrap gap-2 justify-center max-h-40 overflow-y-auto p-2 bg-slate-50 rounded-xl border border-slate-100">
+                                ${ICON_OPTIONS.map(icon => `
+                                    <button onclick="updateEditingIcon('${icon}')" class="w-12 h-12 text-3xl flex items-center justify-center rounded-lg transition-all ${u.icon === icon ? 'bg-white shadow-md scale-110 border-2 border-indigo-400' : 'hover:bg-white hover:shadow-sm'}">
+                                        ${icon}
+                                    </button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-bold text-slate-400 mb-2">いろ</label>
+                            <div class="flex flex-wrap gap-3 justify-center">
+                                ${COLOR_OPTIONS.map(c => `
+                                    <button onclick="updateEditingColor('${c.class}')" class="w-10 h-10 rounded-full border-2 ${c.class.split(' ')[0]} ${u.color === c.class ? 'ring-4 ring-offset-2 ring-indigo-200 scale-110 border-indigo-500' : 'border-transparent opacity-70'}"></button>
+                                `).join('')}
+                            </div>
+                        </div>
+                        <div class="flex gap-3 pt-4">
+                            <button onclick="updateScreen('userSelect'); playTone('tap')" class="flex-1 py-3 rounded-xl bg-slate-200 text-slate-600 font-bold">やめる</button>
+                            <button id="saveUserBtn" onclick="saveUserEdit()" class="flex-1 py-3 rounded-xl text-white font-bold transition-all ${u.name ? 'bg-indigo-500 hover:bg-indigo-600 shadow-md transform hover:-translate-y-1' : 'bg-slate-300'}" ${!u.name ? 'disabled' : ''}>けってい</button>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+            app.innerHTML = html;
         }
-        function renderHome(user, progress) {
-            let html = `<div class="min-h-screen bg-slate-50 p-4 w-full"><div class="max-w-md mx-auto pt-2"><div class="flex justify-between items-center mb-6"><button onclick="updateScreen('userSelect'); playTone('tap')" class="flex items-center gap-2 px-3 py-2 bg-white rounded-full text-slate-500 font-bold shadow-sm hover:bg-slate-100"><i data-lucide="arrow-left" class="w-5 h-5"></i> もどる</button><div class="flex items-center gap-2 px-4 py-2 rounded-full font-bold text-sm ${user.color}"><span>${user.icon}</span><span>${user.name}</span></div></div><header class="mb-6 text-center"><button onclick="updateScreen('stampBook'); playTone('tap')" class="w-full mb-8 p-6 rounded-3xl bg-gradient-to-br from-amber-50 to-orange-100 border-4 border-amber-200 shadow-lg flex items-center gap-4 hover:border-amber-300 hover:scale-[1.02] transition-all group relative overflow-hidden"><div class="absolute -right-6 -top-6 w-32 h-32 bg-yellow-300 rounded-full opacity-20 blur-2xl"></div><div class="text-left flex-1 relative z-10 pl-2"><div class="text-2xl font-black text-amber-800 drop-shadow-sm">👑スタンプちょう👑</div><div class="text-sm text-amber-700 font-bold mt-1 leading-tight flex items-center gap-1"><i data-lucide="crown" class="w-4 h-4 fill-amber-600"></i>3回 パーフェクトでゲット！</div></div><div class="bg-white p-2 rounded-full shadow-sm"><i data-lucide="arrow-right" class="w-6 h-6 text-amber-500"></i></div></button><h2 class="text-2xl font-bold text-slate-700 flex items-center justify-center gap-2"><i data-lucide="grid" class="w-6 h-6 text-indigo-400"></i> どれで あそぶ？</h2></header><div class="space-y-8 mb-12">`;
+
+        function renderHome(user, progress, challengeWords) {
+            let html = `
+            <div class="min-h-screen bg-slate-50 p-4 w-full">
+                <div class="max-w-md mx-auto pt-2">
+                    <div class="flex justify-between items-center mb-6">
+                        <button onclick="updateScreen('userSelect'); playTone('tap')" class="flex items-center gap-2 px-3 py-2 bg-white rounded-full text-slate-500 font-bold shadow-sm hover:bg-slate-100 border border-slate-100">
+                            <i data-lucide="arrow-left" class="w-5 h-5"></i> <span class="text-xs">もどる</span>
+                        </button>
+                        
+                        <button onclick="openModal('helpModal'); playTone('tap')" class="flex items-center gap-1 px-3 py-2 bg-indigo-50 rounded-full text-indigo-600 font-bold shadow-sm hover:bg-indigo-100 border border-indigo-100">
+                            <i data-lucide="help-circle" class="w-4 h-4"></i> <span class="text-xs">つかいかた</span>
+                        </button>
+
+                        <div class="flex items-center gap-2 px-3 py-2 rounded-full font-bold text-xs ${user.color}">
+                            <span>${user.icon}</span><span>${user.name}</span>
+                        </div>
+                    </div>
+
+                    <header class="mb-6 text-center">
+                        <button onclick="updateScreen('stampBook'); playTone('tap')" class="w-full mb-6 p-6 rounded-3xl bg-gradient-to-br from-amber-50 to-orange-100 border-4 border-amber-200 shadow-lg flex items-center gap-4 hover:border-amber-300 hover:scale-[1.02] transition-all group relative overflow-hidden">
+                            <div class="absolute -right-6 -top-6 w-32 h-32 bg-yellow-300 rounded-full opacity-20 blur-2xl"></div>
+                            <div class="text-left flex-1 relative z-10 pl-2">
+                                <div class="text-2xl font-black text-amber-800 drop-shadow-sm">👑スタンプちょう👑</div>
+                                <div class="text-sm text-amber-700 font-bold mt-1 leading-tight flex items-center gap-1">
+                                    <i data-lucide="crown" class="w-4 h-4 fill-amber-600"></i>
+                                    90点以上を 3回でゲット！
+                                </div>
+                            </div>
+                            <div class="bg-white p-2 rounded-full shadow-sm">
+                                <i data-lucide="arrow-right" class="w-6 h-6 text-amber-500"></i>
+                            </div>
+                        </button>
+
+                        ${challengeWords.length > 0 ? `
+                        <button onclick="startChallengeMode()" class="w-full mb-8 p-6 rounded-3xl bg-gradient-to-br from-red-500 to-rose-600 shadow-xl flex items-center gap-4 hover:scale-[1.02] transition-all group relative overflow-hidden animate-pulse">
+                            <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9InJnYmEoMjU1LDI1NSwyNTUsMC4yKSIvPjwvc3ZnPg==')] opacity-30"></div>
+                            <div class="text-left flex-1 relative z-10 pl-2 text-white">
+                                <div class="text-2xl font-black drop-shadow-md flex items-center gap-2">
+                                    🔥 チャレンジBOX
+                                </div>
+                                <div class="text-sm font-bold mt-1 opacity-90">
+                                    あと ${challengeWords.length}もん！ やっつけよう！
+                                </div>
+                            </div>
+                            <div class="bg-white/20 p-2 rounded-full backdrop-blur-sm">
+                                <i data-lucide="sword" class="w-8 h-8 text-white"></i>
+                            </div>
+                        </button>` : ''}
+
+                        <h2 class="text-2xl font-bold text-slate-700 flex items-center justify-center gap-2">
+                            <i data-lucide="grid" class="w-6 h-6 text-indigo-400"></i> どれで あそぶ？
+                        </h2>
+                    </header>
+
+                    <div class="space-y-8 mb-12">`;
+
             CATEGORY_GROUPS.forEach(group => {
-                html += `<div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 relative overflow-hidden"><div class="flex flex-col gap-1 mb-4 relative z-10"><div class="flex justify-between items-start"><span class="text-lg font-bold ${group.color} flex items-center gap-2"><i data-lucide="check-circle" class="w-5 h-5"></i> ${group.title}</span><button onclick="showTips('${group.tipsKey}')" class="flex items-center gap-1 bg-yellow-400 text-white text-xs font-bold px-3 py-1.5 rounded-full hover:bg-yellow-500 transition-colors shadow-sm active:translate-y-0.5"><i data-lucide="lightbulb" class="w-3 h-3"></i> ポイント</button></div><span class="text-xs text-slate-400 font-bold pl-7">${group.desc}</span></div><div class="grid grid-cols-2 gap-3 relative z-10">`; 
+                html += `
+                <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 relative overflow-hidden">
+                    <div class="flex flex-col gap-1 mb-4 relative z-10">
+                        <div class="flex justify-between items-start">
+                            <span class="text-lg font-bold ${group.color} flex items-center gap-2">
+                                <i data-lucide="check-circle" class="w-5 h-5"></i> ${group.title}
+                            </span>
+                            <button onclick="showTips('${group.tipsKey}')" class="flex items-center gap-1 bg-yellow-400 text-white text-xs font-bold px-3 py-1.5 rounded-full hover:bg-yellow-500 transition-colors shadow-sm active:translate-y-0.5">
+                                <i data-lucide="lightbulb" class="w-3 h-3"></i> ポイント
+                            </button>
+                        </div>
+                        <span class="text-xs text-slate-400 font-bold pl-7">${group.desc}</span>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3 relative z-10">`;
+                
                 group.ids.forEach(catId => {
-                    const cat = DATA[catId]; if (!cat) return; 
-                    const p = progress[cat.id] || { perfectCount: 0, stamp: null }; const remainingForCrown = Math.max(0, 3 - p.perfectCount);
-                    html += `<button onclick="startCategory('${cat.id}')" class="relative w-full p-4 rounded-2xl shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1 text-left bg-gradient-to-br ${cat.color} text-white group overflow-hidden h-full border-b-4 border-black/10 active:border-b-0 active:translate-y-1"><div class="absolute -right-3 -bottom-5 text-[5rem] opacity-20 pointer-events-none select-none font-emoji transform rotate-[-10deg] filter grayscale brightness-125 contrast-125 saturate-50 mix-blend-overlay">${cat.bgIcon}</div><div class="flex flex-col justify-between items-start relative z-10 h-full"><div class="flex-1 min-w-0 mb-2"><span class="text-lg font-bold flex flex-wrap items-center gap-1 leading-tight drop-shadow-sm">${cat.label} ${p.stamp ? `<span class="text-xl animate-shine drop-shadow-sm ml-1">👑</span>` : ''}</span></div><div class="w-full flex justify-between items-end"><div class="text-[10px] bg-black/20 px-2 py-1 rounded-full whitespace-nowrap font-bold shadow-sm backdrop-blur-sm">${cat.items.length}もん</div>${!p.stamp && p.perfectCount > 0 ? `<span class="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full whitespace-nowrap font-bold text-[10px] shadow-sm">あと${remainingForCrown}</span>` : ''}</div></div></button>`;
+                    const cat = DATA[catId];
+                    if (!cat) return;
+                    
+                    const p = progress[cat.id] || { perfectCount: 0, stamp: null };
+                    const remainingForCrown = Math.max(0, 3 - p.perfectCount);
+                    
+                    html += `
+                    <button onclick="startCategory('${cat.id}')" class="relative w-full p-4 rounded-2xl shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1 text-left bg-gradient-to-br ${cat.color} text-white group overflow-hidden h-full border-b-4 border-black/10 active:border-b-0 active:translate-y-1">
+                        <div class="absolute -right-3 -bottom-5 text-[5rem] opacity-20 pointer-events-none select-none font-emoji transform rotate-[-10deg] filter grayscale brightness-125 contrast-125 saturate-50 mix-blend-overlay">
+                            ${cat.bgIcon}
+                        </div>
+                        <div class="flex flex-col justify-between items-start relative z-10 h-full">
+                            <div class="flex-1 min-w-0 mb-2">
+                                <span class="text-lg font-bold flex flex-wrap items-center gap-1 leading-tight drop-shadow-sm">
+                                    ${cat.label}
+                                    ${p.stamp ? `<span class="text-xl animate-shine drop-shadow-sm ml-1">👑</span>` : ''}
+                                </span>
+                            </div>
+                            <div class="w-full flex justify-between items-end">
+                                <div class="text-[10px] bg-black/20 px-2 py-1 rounded-full whitespace-nowrap font-bold shadow-sm backdrop-blur-sm">
+                                    ${cat.items.length}もん
+                                </div>
+                                ${!p.stamp && p.perfectCount > 0 ? `<span class="bg-yellow-400 text-yellow-900 px-2 py-1 rounded-full whitespace-nowrap font-bold text-[10px] shadow-sm">あと${remainingForCrown}</span>` : ''}
+                            </div>
+                        </div>
+                    </button>`;
                 });
+                
                 html += `</div></div>`;
             });
-            html += `</div><div class="text-center pb-8 border-t border-slate-200 pt-8"><button onclick="updateScreen('history'); playTone('tap')" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-slate-500 rounded-xl font-bold shadow-sm border-2 border-slate-200 hover:bg-slate-50 transition-colors text-sm"><i data-lucide="history" class="w-4 h-4"></i> きろくを みる</button></div></div></div>`; app.innerHTML = html;
+
+            html += `
+                    </div>
+                    <div class="text-center pb-8 border-t border-slate-200 pt-8">
+                        <button onclick="updateScreen('history'); playTone('tap')" class="inline-flex items-center gap-2 px-6 py-3 bg-white text-slate-500 rounded-xl font-bold shadow-sm border-2 border-slate-200 hover:bg-slate-50 transition-colors text-sm">
+                            <i data-lucide="history" class="w-4 h-4"></i> きろくを みる
+                        </button>
+                    </div>
+                </div>
+            </div>`;
+            app.innerHTML = html;
         }
+
         function renderStampBook(progress) {
-            const cats = Object.values(DATA); const totalStamps = cats.length; const collectedStamps = cats.filter(cat => progress[cat.id]?.stamp).length; const percentage = Math.round((collectedStamps / totalStamps) * 100);
-            let html = `<div class="min-h-screen bg-amber-50 p-4 w-full"><div class="max-w-md mx-auto pt-2"><div class="flex justify-between items-center mb-6"><button onclick="updateScreen('home'); playTone('tap')" class="p-2 bg-white rounded-full shadow-sm text-amber-400 hover:text-amber-600 transition-colors"><i data-lucide="arrow-left" class="w-6 h-6"></i></button><h2 class="text-xl font-bold text-amber-900 flex items-center gap-2">👑スタンプちょう👑</h2><div class="w-10"></div></div><div class="mb-6 bg-white p-4 rounded-2xl shadow-sm border-2 border-amber-100"><div class="flex justify-between items-end mb-2"><span class="text-sm font-bold text-amber-800">あつめた数</span><span class="text-2xl font-black text-amber-600">${collectedStamps} <span class="text-sm text-amber-400 font-bold">/ ${totalStamps}</span></span></div><div class="h-4 bg-amber-100 rounded-full overflow-hidden"><div class="h-full bg-amber-400 rounded-full transition-all duration-1000 ease-out" style="width: ${percentage}%"></div></div></div><div class="bg-white rounded-3xl p-4 shadow-xl border-4 border-amber-200 min-h-[400px] relative overflow-hidden"><div class="absolute top-0 left-0 w-full h-6 bg-gradient-to-b from-amber-50 to-transparent opacity-50 pointer-events-none"></div><div class="grid grid-cols-3 gap-3 relative z-10 pb-4">`; 
-            cats.forEach(cat => { const p = progress[cat.id] || { perfectCount: 0, stamp: null }; const hasStamp = !!p.stamp; const remaining = Math.max(0, 3 - p.perfectCount); html += `<div class="flex flex-col items-center group"><div class="aspect-square w-full rounded-2xl border-4 flex items-center justify-center relative bg-slate-50 transition-all ${hasStamp ? 'border-amber-300 bg-amber-50 shadow-md scale-100' : 'border-dashed border-slate-200 opacity-70'}">${hasStamp ? `<div class="text-4xl animate-shine drop-shadow-sm filter">${p.stamp}</div>` : `<div class="text-center w-full flex flex-col items-center text-slate-300 font-bold"><i data-lucide="lock" class="w-6 h-6 mb-1"></i>${p.perfectCount > 0 ? `<div class="text-[10px] font-bold text-amber-500 bg-amber-100 rounded-full px-2 py-0.5 mt-1">あと${remaining}</div>` : ``}</div>`}</div><div class="text-[10px] font-bold text-slate-500 mt-1 w-full text-center truncate">${cat.label}</div></div>`; });
-            html += `</div></div></div></div>`; app.innerHTML = html;
+            const cats = Object.values(DATA).filter(c => c.id !== 'challenge'); // チャレンジ用データを除外
+            const totalStamps = cats.length;
+            const collectedStamps = cats.filter(cat => progress[cat.id]?.stamp).length;
+            const percentage = Math.round((collectedStamps / totalStamps) * 100);
+
+            let html = `
+            <div class="min-h-screen bg-amber-50 p-4 w-full">
+                <div class="max-w-md mx-auto pt-2">
+                    <div class="flex justify-between items-center mb-6">
+                        <button onclick="updateScreen('home'); playTone('tap')" class="p-2 bg-white rounded-full shadow-sm text-amber-400 hover:text-amber-600 transition-colors">
+                            <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                        </button>
+                        <h2 class="text-xl font-bold text-amber-900 flex items-center gap-2">
+                            👑スタンプちょう👑
+                        </h2>
+                        <div class="w-10"></div>
+                    </div>
+
+                    <div class="mb-6 bg-white p-4 rounded-2xl shadow-sm border-2 border-amber-100">
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="text-sm font-bold text-amber-800">あつめた数</span>
+                            <span class="text-2xl font-black text-amber-600">${collectedStamps} <span class="text-sm text-amber-400 font-bold">/ ${totalStamps}</span></span>
+                        </div>
+                        <div class="h-4 bg-amber-100 rounded-full overflow-hidden">
+                            <div class="h-full bg-amber-400 rounded-full transition-all duration-1000 ease-out" style="width: ${percentage}%"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-3xl p-4 shadow-xl border-4 border-amber-200 min-h-[400px] relative overflow-hidden">
+                        <div class="absolute top-0 left-0 w-full h-6 bg-gradient-to-b from-amber-50 to-transparent opacity-50 pointer-events-none"></div>
+                        
+                        <div class="grid grid-cols-3 gap-3 relative z-10 pb-4">`;
+
+            cats.forEach(cat => {
+                const p = progress[cat.id] || { perfectCount: 0, stamp: null };
+                const hasStamp = !!p.stamp;
+                const remaining = Math.max(0, 3 - p.perfectCount);
+
+                html += `
+                <div class="flex flex-col items-center group">
+                    <div class="aspect-square w-full rounded-2xl border-4 flex items-center justify-center relative bg-slate-50 transition-all
+                        ${hasStamp ? 'border-amber-300 bg-amber-50 shadow-md scale-100' : 'border-dashed border-slate-200 opacity-70'}
+                    ">
+                        ${hasStamp 
+                            ? `<div class="text-4xl animate-shine drop-shadow-sm filter">${p.stamp}</div>`
+                            : `<div class="text-center w-full flex flex-col items-center text-slate-300 font-bold">
+                                <i data-lucide="lock" class="w-6 h-6 mb-1"></i>
+                                ${p.perfectCount > 0 
+                                    ? `<div class="text-[10px] font-bold text-amber-500 bg-amber-100 rounded-full px-2 py-0.5 mt-1">あと${remaining}</div>`
+                                    : ``
+                                }
+                               </div>`
+                        }
+                    </div>
+                    <div class="text-[10px] font-bold text-slate-500 mt-1 w-full text-center truncate">
+                        ${cat.label}
+                    </div>
+                </div>`;
+            });
+
+            html += `</div></div></div></div>`;
+            app.innerHTML = html;
         }
+
         function renderHistory() {
             const history = (state.currentUserId && state.allUsersData[state.currentUserId]) ? state.allUsersData[state.currentUserId].history : [];
-            let html = `<div class="min-h-screen bg-slate-50 p-4 w-full"><div class="max-w-md mx-auto pt-2 h-full flex flex-col"><div class="flex justify-between items-center mb-6"><button onclick="updateScreen('home'); playTone('tap')" class="p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-slate-600"><i data-lucide="arrow-left" class="w-6 h-6"></i></button><h2 class="text-xl font-bold text-slate-700 flex items-center gap-2"><i data-lucide="history" class="w-6 h-6 text-indigo-500"></i> あそんだ きろく</h2><div class="w-10"></div></div><div class="bg-white rounded-3xl shadow-sm border border-slate-100 flex-1 overflow-hidden flex flex-col min-h-[400px]"><div class="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center"><div class="flex flex-col"><span class="font-bold text-slate-500">${history.length} かい</span><span class="text-[10px] text-slate-400 font-bold">※さいしん ${HISTORY_LIMIT}けん まで</span></div>${history.length > 0 ? `<button onclick="clearHistory()" class="text-xs flex items-center gap-1 text-red-400 hover:text-red-600 font-bold bg-white px-3 py-1.5 rounded-full border border-red-100"><i data-lucide="trash-2" class="w-3 h-3"></i> ぜんぶけす</button>` : ''}</div><div class="overflow-y-auto flex-1 p-2 space-y-2">`;
-            if (history.length === 0) { html += `<div class="h-40 flex items-center justify-center text-slate-400 font-bold">まだ きろくが ないよ</div>`; } 
-            else { history.forEach(record => { const cat = DATA[record.categoryId]; const score = record.score !== undefined ? record.score : Math.round((record.correctCount/record.total)*100); html += `<div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl"><div class="w-12 h-12 rounded-lg bg-gradient-to-br ${cat?.color || 'from-slate-300 to-slate-400'} flex items-center justify-center text-lg text-white font-bold">${score}%</div><div class="flex-1"><div class="font-bold text-slate-700 text-sm">${cat?.label || 'Unknown'}</div><div class="text-[10px] text-slate-400 font-bold">${record.date}</div></div>${record.isPerfect ? `<div class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-md text-[10px] font-bold border border-yellow-200">パーフェクト</div>` : ''}</div>`; }); }
-            html += `</div></div></div></div>`; app.innerHTML = html;
+            
+            let html = `
+            <div class="min-h-screen bg-slate-50 p-4 w-full">
+                <div class="max-w-md mx-auto pt-2 h-full flex flex-col">
+                    <div class="flex justify-between items-center mb-6">
+                        <button onclick="updateScreen('home'); playTone('tap')" class="p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-slate-600">
+                            <i data-lucide="arrow-left" class="w-6 h-6"></i>
+                        </button>
+                        <h2 class="text-xl font-bold text-slate-700 flex items-center gap-2">
+                            <i data-lucide="history" class="w-6 h-6 text-indigo-500"></i> あそんだ きろく
+                        </h2>
+                        <div class="w-10"></div>
+                    </div>
+                    <div class="bg-white rounded-3xl shadow-sm border border-slate-100 flex-1 overflow-hidden flex flex-col min-h-[400px]">
+                        <div class="p-4 bg-slate-50 border-b border-slate-100 flex justify-between items-center">
+                            <div class="flex flex-col">
+                                <span class="font-bold text-slate-500">${history.length} かい</span>
+                                <span class="text-[10px] text-slate-400 font-bold">※さいしん ${HISTORY_LIMIT}けん まで</span>
+                            </div>
+                            ${history.length > 0 ? `<button onclick="clearHistory()" class="text-xs flex items-center gap-1 text-red-400 hover:text-red-600 font-bold bg-white px-3 py-1.5 rounded-full border border-red-100"><i data-lucide="trash-2" class="w-3 h-3"></i> ぜんぶけす</button>` : ''}
+                        </div>
+                        <div class="overflow-y-auto flex-1 p-2 space-y-2">`;
+
+            if (history.length === 0) {
+                html += `<div class="h-40 flex items-center justify-center text-slate-400 font-bold">まだ きろくが ないよ</div>`;
+            } else {
+                history.forEach(record => {
+                    let cat;
+                    if (record.categoryId === 'challenge') {
+                        cat = { label: 'チャレンジBOX', color: 'from-red-400 to-orange-400' };
+                    } else {
+                        cat = DATA[record.categoryId];
+                    }
+                    
+                    const score = record.score !== undefined ? record.score : Math.round((record.correctCount / record.total) * 100);
+                    
+                    html += `
+                    <div class="flex items-center gap-3 p-3 bg-slate-50 rounded-xl">
+                        <div class="w-12 h-12 rounded-lg bg-gradient-to-br ${cat?.color || 'from-slate-300 to-slate-400'} flex items-center justify-center text-lg text-white font-bold">
+                            ${score}%
+                        </div>
+                        <div class="flex-1">
+                            <div class="font-bold text-slate-700 text-sm">${cat?.label || 'Unknown'}</div>
+                            <div class="text-[10px] text-slate-400 font-bold">${record.date}</div>
+                        </div>
+                        ${record.isPass ? `<div class="bg-yellow-100 text-yellow-600 px-2 py-1 rounded-md text-[10px] font-bold border border-yellow-200">OK!</div>` : ''}
+                    </div>`;
+                });
+            }
+
+            html += `</div></div></div></div>`;
+            app.innerHTML = html;
         }
 
         // ゲーム画面
@@ -640,18 +1381,15 @@
             const currentItem = gameState.quizItems[gameState.questionIndex];
             const progressPercent = ((gameState.questionIndex) / gameState.quizItems.length) * 100;
             const isPhaseQuestion = gameState.phase === 'question';
-            const isCorrect = gameState.userAnswer === normalizeVowel(currentItem.v); // アニメ判定用には既存関数も使う
-
-            // ボックス生成ロジック
+            
+            // -----------------------------
+            // ボックス生成ロジック (Frame対応)
+            // -----------------------------
             let boxes = [];
             const parts = [currentItem.c1, currentItem.center, currentItem.c2];
             
-            // 穴あき位置の判定(モードによる強制上書き)
-            
-            // ★変更点：rounded-2xlで角丸を強化、flex items-center justify-center で中央配置、leading-none と pb-2 で視覚的な中心調整
+            // スタイル定義
             const boxBaseClass = "letter-box w-16 h-20 text-5xl shadow-sm mx-0.5 rounded-2xl flex items-center justify-center leading-none pb-2"; 
-            
-            // フレーム定義（こちらも角丸をあわせる）
             const frameBaseClass = "flex items-center justify-center p-2 rounded-3xl mx-1 gap-1 shadow-sm";
 
             // アニメーション決定
@@ -664,110 +1402,90 @@
                 else animationClass = 'nobi-effect';
             }
 
+            // 特殊モード（フレーム表示）の判定フラグ
+            // データ定義の mode プロパティで判断
+            let useFrameMode = false;
+            let frameType = ''; // 'blends_1', 'blends_2', 'digraph_v1' など
+
+            if (cat.mode && cat.mode.includes('frame')) {
+                useFrameMode = true;
+                frameType = cat.mode;
+            }
+
             for(let i=0; i<3; i++) {
                 const partText = parts[i] || ""; 
                 const chars = partText.split('');
 
-                // ----------------------------------------------------
-                // 1. Blends (L, R系) : c1 (i=0) をフレーム化して 2文字目を隠す
-                // ----------------------------------------------------
-                if (cat.mode === 'blends_1_frame' && i === 0) {
-                    if (chars.length >= 2) {
-                        const char1 = chars[0];
-                        const char2 = chars[1]; // これが穴あき対象 (l or r)
-                        const isPartCorrect = (!isPhaseQuestion && gameState.userAnswer === currentItem.ans);
-                        const boxColor = isPartCorrect ? 'bg-green-100 border-green-500 text-green-700' : (isPhaseQuestion ? 'bg-white border-slate-200 text-slate-400' : 'bg-blue-100 border-blue-500 text-blue-700');
-
-                        // ★修正: オレンジ塗りつぶしフレーム (bg-orange-200)
-                        boxes.push(`
-                            <div class="${frameBaseClass} bg-orange-200">
-                                <div class="${boxBaseClass} bg-white border-4 border-slate-300 text-slate-700">${char1}</div>
-                                <div class="${boxBaseClass} border-4 ${boxColor}">
-                                    ${isPhaseQuestion ? '?' : `<span class="${isPartCorrect ? animationClass : ''} inline-block">${currentItem.ans}</span>`}
-                                </div>
+                // --- Frame: Blends Type 1 (L/R系) ---
+                if (useFrameMode && frameType === 'blends_1_frame' && i === 0 && chars.length >= 2) {
+                    const char1 = chars[0];
+                    const isPartCorrect = (!isPhaseQuestion && gameState.userAnswer === currentItem.ans);
+                    const boxColor = isPartCorrect ? 'bg-green-100 border-green-500 text-green-700' : (isPhaseQuestion ? 'bg-white border-slate-200 text-slate-400' : 'bg-blue-100 border-blue-500 text-blue-700');
+                    boxes.push(`
+                        <div class="${frameBaseClass} bg-orange-200">
+                            <div class="${boxBaseClass} bg-white border-4 border-slate-300 text-slate-700">${char1}</div>
+                            <div class="${boxBaseClass} border-4 ${boxColor}">
+                                ${isPhaseQuestion ? '?' : `<span class="${isPartCorrect ? animationClass : ''} inline-block">${currentItem.ans}</span>`}
                             </div>
-                        `);
-                        continue; // 次のループへ
-                    }
+                        </div>
+                    `);
+                    continue;
                 }
                 
-                // ----------------------------------------------------
-                // 2. Blends (S系) : c1 (i=0) をフレーム化して 2文字目を隠す
-                // ----------------------------------------------------
-                if (cat.mode === 'blends_2_frame' && i === 0) {
-                    if (chars.length >= 2) {
-                        const char1 = chars[0]; // S (固定)
-                        const char2 = chars[1]; // 穴あき対象
-                        const isPartCorrect = (!isPhaseQuestion && gameState.userAnswer === currentItem.ans);
-                        const boxColor = isPartCorrect ? 'bg-green-100 border-green-500 text-green-700' : (isPhaseQuestion ? 'bg-white border-slate-200 text-slate-400' : 'bg-blue-100 border-blue-500 text-blue-700');
-
-                        // ★修正: 赤塗りつぶしフレーム (bg-red-200)
-                        boxes.push(`
-                            <div class="${frameBaseClass} bg-red-200">
-                                <div class="${boxBaseClass} bg-white border-4 border-slate-300 text-slate-700">${char1}</div>
-                                <div class="${boxBaseClass} border-4 ${boxColor}">
-                                    ${isPhaseQuestion ? '?' : `<span class="${isPartCorrect ? animationClass : ''} inline-block">${currentItem.ans}</span>`}
-                                </div>
+                // --- Frame: Blends Type 2 (S系) ---
+                if (useFrameMode && frameType === 'blends_2_frame' && i === 0 && chars.length >= 2) {
+                    const char1 = chars[0];
+                    const isPartCorrect = (!isPhaseQuestion && gameState.userAnswer === currentItem.ans);
+                    const boxColor = isPartCorrect ? 'bg-green-100 border-green-500 text-green-700' : (isPhaseQuestion ? 'bg-white border-slate-200 text-slate-400' : 'bg-blue-100 border-blue-500 text-blue-700');
+                    boxes.push(`
+                        <div class="${frameBaseClass} bg-red-200">
+                            <div class="${boxBaseClass} bg-white border-4 border-slate-300 text-slate-700">${char1}</div>
+                            <div class="${boxBaseClass} border-4 ${boxColor}">
+                                ${isPhaseQuestion ? '?' : `<span class="${isPartCorrect ? animationClass : ''} inline-block">${currentItem.ans}</span>`}
                             </div>
-                        `);
-                        continue;
-                    }
+                        </div>
+                    `);
+                    continue;
                 }
 
-                // ----------------------------------------------------
-                // 3. 母音ダイグラフ① : center (i=1) をフレーム化して 1文字目を隠す
-                // ----------------------------------------------------
-                if (cat.mode === 'digraph_v1_frame' && i === 1) {
-                    if (chars.length >= 2) {
-                        const char1 = chars[0]; // 穴あき対象 (e, a, i...)
-                        const char2 = chars[1]; // ヒントとして表示
-                        const isPartCorrect = (!isPhaseQuestion && gameState.userAnswer === currentItem.ans);
-                        const boxColor = isPartCorrect ? 'bg-green-100 border-green-500 text-green-700' : (isPhaseQuestion ? 'bg-white border-slate-200 text-slate-400' : 'bg-blue-100 border-blue-500 text-blue-700');
-
-                        // ★修正: ピンク塗りつぶしフレーム (bg-pink-200)
-                        boxes.push(`
-                            <div class="${frameBaseClass} bg-pink-200">
-                                <div class="${boxBaseClass} border-4 ${boxColor}">
-                                    ${isPhaseQuestion ? '?' : `<span class="${isPartCorrect ? animationClass : ''} inline-block">${currentItem.ans}</span>`}
-                                </div>
-                                <div class="${boxBaseClass} bg-white border-4 border-slate-300 text-slate-700">${char2}</div>
+                // --- Frame: Digraph V1 (Magic E / Name) ---
+                if (useFrameMode && frameType === 'digraph_v1_frame' && i === 1 && chars.length >= 2) {
+                    const char2 = chars[1];
+                    const isPartCorrect = (!isPhaseQuestion && gameState.userAnswer === currentItem.ans);
+                    const boxColor = isPartCorrect ? 'bg-green-100 border-green-500 text-green-700' : (isPhaseQuestion ? 'bg-white border-slate-200 text-slate-400' : 'bg-blue-100 border-blue-500 text-blue-700');
+                    boxes.push(`
+                        <div class="${frameBaseClass} bg-pink-200">
+                            <div class="${boxBaseClass} border-4 ${boxColor}">
+                                ${isPhaseQuestion ? '?' : `<span class="${isPartCorrect ? animationClass : ''} inline-block">${currentItem.ans}</span>`}
                             </div>
-                        `);
-                        continue;
-                    }
+                            <div class="${boxBaseClass} bg-white border-4 border-slate-300 text-slate-700">${char2}</div>
+                        </div>
+                    `);
+                    continue;
                 }
 
-                // ----------------------------------------------------
-                // 4. 通常表示 (穴あき位置は hidePos に従う)
-                // ----------------------------------------------------
-                // ただし上記モードの場合、hidePosは無視されるべきなので
-                // hidePosがこのパーツを指していても、上記で処理されていなければ「表示」扱いにする
+                // --- 通常表示 (CVC, Digraphs normal, etc) ---
+                // フレームモード以外で、hidePos に該当する場所
+                // ただし、チャレンジモードの場合は currentItem 自体の属性を信じる
                 
-                // もし従来のロジックでこのパーツが hidePos 対象だった場合
                 let isHidden = (i === currentItem.hidePos);
-
-                // ただし、フレームモードの場合は、上記の特別処理以外はすべて「表示」にする
-                if (cat.mode.includes('frame')) {
-                    isHidden = false;
-                }
+                if (useFrameMode) isHidden = false; // フレームモードならここで処理しない
 
                 for (let j=0; j<chars.length; j++) {
                     if (isHidden) {
-                        // 従来の穴あき表示（今回の改修ではここは通らないはずだが念のため）
-                        const ansChars = currentItem.ans.split(''); // ansが複数文字の場合もある
-                        // ※CVCなどはここを通る
+                        const ansChars = currentItem.ans.split('');
                         if (isPhaseQuestion) {
                             boxes.push(`<div class="${boxBaseClass} bg-white border-4 border-slate-200 text-slate-400">?</div>`);
                         } else {
-                            const isBoxCorrect = (gameState.userAnswer === normalizeVowel(currentItem.v));
+                            const isBoxCorrect = (gameState.userAnswer === currentItem.v || gameState.userAnswer === currentItem.ans); // 簡易判定
                             const colorClass = isBoxCorrect ? 'bg-green-100 border-green-500 text-green-700' : 'bg-blue-100 border-blue-500 text-blue-700';
                             boxes.push(`<div class="${boxBaseClass} border-4 ${colorClass}"><span class="${animationClass} inline-block">${ansChars[j] || chars[j]}</span></div>`);
                         }
                     } else {
-                        // 通常表示
+                        // 通常文字
                         let specialClass = "bg-white border-4 border-slate-300 text-slate-700"; 
                         let textClass = "";
-                        // Magic E の装飾
+                        // Magic E ハイライト
                         if (cat.id.startsWith('magic_e') && i === 2 && j === chars.length - 1 && chars[j] === 'e') {
                              specialClass = "bg-white border-4 border-slate-300 text-slate-700 magic-card-shiny";
                              if (!isPhaseQuestion) { textClass = "text-slate-400"; }
@@ -777,12 +1495,19 @@
                 }
             }
 
+            // -----------------------------
             // 選択肢ボタンロジック
+            // -----------------------------
             let choices = [];
             let gridCols = 'grid-cols-5';
             let buttonTextSize = 'text-4xl';
 
-            if (cat.mode === 'digraph_c1') {
+            if (gameState.isChallengeMode) {
+                // チャレンジモードの場合、汎用的なボタンセットを表示
+                // ※キーボード入力も可能
+                choices = ['a', 'e', 'i', 'o', 'u'];
+                gridCols = 'grid-cols-5';
+            } else if (cat.mode === 'digraph_c1') {
                 choices = ['sh', 'ch', 'th', 'wh']; 
                 gridCols = 'grid-cols-4'; 
                 buttonTextSize = 'text-3xl'; 
@@ -799,15 +1524,12 @@
                 gridCols = 'grid-cols-2';
                 buttonTextSize = 'text-3xl';
             } else if (cat.mode === 'digraph_v1_frame') {
-                // 母音ダイグラフ① 仕様変更: 5母音のみ
                 choices = ['a', 'e', 'i', 'o', 'u'];
                 gridCols = 'grid-cols-5';
             } else if (cat.mode === 'blends_1_frame') {
-                // Blends 1 仕様変更: l, r のみ
                 choices = ['l', 'r'];
                 gridCols = 'grid-cols-2';
             } else if (cat.mode === 'blends_2_frame') {
-                // Blends 2 仕様変更: 指定の8文字
                 choices = ['c', 'k', 'l', 'm', 'n', 'p', 't', 'w'];
                 gridCols = 'grid-cols-4';
                 buttonTextSize = 'text-3xl';
@@ -817,7 +1539,6 @@
 
             let html = `
             <div class="min-h-screen bg-slate-100 flex flex-col items-center p-4 transition-all w-full">
-                <!-- Header -->
                 <div class="w-full md:max-w-4xl max-w-md flex justify-between items-center mb-4 pt-2 h-14 shrink-0">
                     <button onclick="updateScreen('home'); playTone('tap')" class="p-2 bg-white rounded-full shadow-sm text-slate-400 hover:text-slate-600"><i data-lucide="home" class="w-6 h-6"></i></button>
                     <div class="flex-1 mx-4">
@@ -827,7 +1548,6 @@
                     <button onclick="toggleSound()" class="p-2 rounded-full transition-colors ${state.isSoundOn ? 'bg-indigo-100 text-indigo-600' : 'bg-slate-200 text-slate-400'}"><i data-lucide="${state.isSoundOn ? 'volume-2' : 'volume-x'}" class="w-5 h-5"></i></button>
                 </div>
 
-                <!-- Game Content -->
                 <div class="w-full md:max-w-4xl max-w-md flex flex-col items-center">
                     
                     <div class="bg-white rounded-3xl shadow-sm p-4 w-full text-center mb-6 border border-slate-100 min-h-[150px] flex flex-col items-center justify-center">
@@ -851,7 +1571,6 @@
 
                 </div>
 
-                <!-- Answer Area -->
                 <div class="w-full md:max-w-4xl max-w-md mt-8 mb-12 flex flex-col justify-start min-h-[220px]">
                     ${isPhaseQuestion ? `
                         <div class="grid ${gridCols} gap-2 sm:gap-3">
@@ -864,13 +1583,14 @@
                                 `;
                             }).join('')}
                         </div>
+                        <p class="text-center text-xs text-slate-400 font-bold mt-4 tracking-widest opacity-60">KEYBOARD OK</p>
                     ` : `
                         <div class="animate-in slide-in-from-bottom-4 fade-in duration-300 w-full">
-                            <div class="${(gameState.correctCount > 0 && gameState.userAnswer === (cat.mode.includes('frame') ? currentItem.ans : normalizeVowel(currentItem.v))) ? 'bg-green-50 border-green-400' : 'bg-indigo-50 border-indigo-400'} border-l-4 p-4 mb-4 rounded-r-xl shadow-sm">
+                            <div class="${(gameState.correctCount > 0 && gameState.userAnswer === (useFrameMode ? currentItem.ans : currentItem.v)) ? 'bg-green-50 border-green-400' : 'bg-indigo-50 border-indigo-400'} border-l-4 p-4 mb-4 rounded-r-xl shadow-sm">
                                 <div class="flex flex-col gap-2">
                                     <div class="flex items-center gap-2 mb-2">
-                                        ${(gameState.userAnswer === (cat.mode.includes('frame') ? currentItem.ans : normalizeVowel(currentItem.v))) ? '<i data-lucide="check-circle" class="w-6 h-6 text-green-500"></i>' : '<span class="text-indigo-600 font-bold text-sm">正解は...</span>'}
-                                        <span class="text-3xl font-black ${(gameState.userAnswer === (cat.mode.includes('frame') ? currentItem.ans : normalizeVowel(currentItem.v))) ? 'text-green-700' : 'text-indigo-700'}">${currentItem.w}</span>
+                                        ${(gameState.userAnswer === (useFrameMode ? currentItem.ans : currentItem.v)) ? '<i data-lucide="check-circle" class="w-6 h-6 text-green-500"></i>' : '<span class="text-indigo-600 font-bold text-sm">正解は...</span>'}
+                                        <span class="text-3xl font-black ${(gameState.userAnswer === (useFrameMode ? currentItem.ans : currentItem.v)) ? 'text-green-700' : 'text-indigo-700'}">${currentItem.w}</span>
                                     </div>
                                     <div class="text-slate-600 text-lg font-bold bg-white/50 p-2 rounded-lg">
                                         ${currentItem.j}
@@ -880,6 +1600,7 @@
                             <button onclick="nextQuestion()" class="w-full py-4 bg-indigo-600 hover:bg-indigo-700 text-white rounded-2xl font-bold text-xl shadow-lg transition-all flex items-center justify-center gap-2">
                                 つぎへ <i data-lucide="arrow-right" class="w-6 h-6"></i>
                             </button>
+                            <p class="text-center text-indigo-800 text-xs font-bold mt-2">Enterキーでも すすめるよ</p>
                         </div>
                     `}
                 </div>
@@ -889,20 +1610,142 @@
         }
 
         function renderResult(user, progress) {
-            const cat = DATA[gameState.currentCategory];
-            const remaining = Math.max(0, 3 - (progress[cat.id]?.perfectCount || 0));
-            const { isPerfect, canGetStamp, score, correctCount, total } = state.resultInfo;
+            let catId = gameState.currentCategory;
+            let catLabel = "";
+            let remaining = 0;
+
+            // チャレンジモードの残り数をリアルタイム取得
+            const challengeRemaining = (state.allUsersData[state.currentUserId].challengeWords || []).length;
+
+            if (gameState.isChallengeMode) {
+                catLabel = "チャレンジBOX";
+                remaining = 0;
+            } else {
+                const cat = DATA[catId];
+                catLabel = cat.label;
+                remaining = Math.max(0, 3 - (progress[cat.id]?.perfectCount || 0));
+            }
+
+            const { isPass, canGetStamp, score, correctCount, total } = state.resultInfo;
             
-            let html = `<div class="min-h-screen bg-slate-50 flex items-center justify-center p-4 w-full"><div class="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-xl border-4 border-yellow-200 relative overflow-hidden"><div class="mb-6 flex justify-center relative z-10">${canGetStamp ? `<div class="relative"><span class="text-8xl animate-bounce inline-block">🎁</span><i data-lucide="sparkles" class="absolute -top-4 -right-4 w-12 h-12 text-yellow-300 animate-ping"></i></div>` : (isPerfect ? `<i data-lucide="trophy" class="w-24 h-24 text-yellow-400 fill-yellow-100 animate-bounce"></i>` : `<i data-lucide="thumbs-up" class="w-24 h-24 text-orange-500 fill-orange-100 animate-bounce"></i>`)}</div>${isPerfect ? `<h2 class="text-4xl font-black text-yellow-500 mb-2 drop-shadow-sm">Perfect!!</h2>` : `<h2 class="text-3xl font-bold text-slate-800 mb-2">Good Job!</h2>`}<p class="text-lg text-slate-600 font-bold mb-6">${correctCount}問 せいかい！ (${score}%)</p>${isPerfect && !canGetStamp ? `<div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 mb-6 animate-in zoom-in"><div class="flex items-center justify-center gap-2 text-yellow-600 font-bold mb-1"><i data-lucide="sparkles" class="w-5 h-5"></i><span>おめでとう！</span><i data-lucide="sparkles" class="w-5 h-5"></i></div><p class="text-slate-700 font-bold">パーフェクト達成だね🏅</p><p class="text-sm text-slate-500 font-bold mt-2">あと ${remaining}かいで<br/>スタンプ ゲット！</p></div>` : ''}${canGetStamp ? `<div class="mb-6 animate-in zoom-in duration-500"><button onclick="updateScreen('stampSelect'); playTone('tap')" class="w-full py-4 bg-yellow-400 text-white rounded-2xl font-black text-xl shadow-lg border-b-4 border-yellow-600 active:border-b-0 active:translate-y-1 animate-pulse">スタンプを えらぶ！</button></div>` : `<div class="flex flex-col gap-3 relative z-10"><button onclick="startCategory('${cat.id}')" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-bold text-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2"><i data-lucide="refresh-ccw" class="w-5 h-5"></i> もういちど やる</button><button onclick="updateScreen('home'); playTone('tap')" class="w-full py-4 rounded-xl bg-slate-200 text-slate-700 font-bold text-lg hover:bg-slate-300 transition-colors flex items-center justify-center gap-2"><i data-lucide="home" class="w-5 h-5"></i> メニューへ もどる</button></div>`}</div></div>`; app.innerHTML = html;
+            // アイコン表示ロジックの分岐
+            let iconHtml = '';
+            
+            if (gameState.isChallengeMode) {
+                // --- チャレンジモードの場合 ---
+                if (challengeRemaining === 0) {
+                    // 完食！
+                    iconHtml = `<div class="relative"><span class="text-8xl animate-bounce inline-block">🎉</span><span class="absolute -bottom-4 left-1/2 transform -translate-x-1/2 bg-yellow-400 text-white font-black px-4 py-1 rounded-full text-lg shadow-md whitespace-nowrap border-2 border-yellow-200">クリア！</span></div>`;
+                } else {
+                    // まだ残ってる
+                    iconHtml = `<div class="relative"><i data-lucide="layers" class="w-24 h-24 text-orange-400 fill-orange-100 animate-bounce"></i><span class="absolute -bottom-2 -right-2 bg-red-500 text-white font-bold px-3 py-1 rounded-full text-sm shadow-md whitespace-nowrap border-2 border-white">あと ${challengeRemaining} もん</span></div>`;
+                }
+            } else {
+                // --- 通常モードの場合 ---
+                if (canGetStamp) {
+                    iconHtml = `<div class="relative"><span class="text-8xl animate-bounce inline-block">🎁</span><i data-lucide="sparkles" class="absolute -top-4 -right-4 w-12 h-12 text-yellow-300 animate-ping"></i></div>`; 
+                } else if (isPass) {
+                    iconHtml = `<div class="relative"><i data-lucide="trophy" class="w-24 h-24 text-yellow-400 fill-yellow-100 animate-bounce"></i><span class="absolute -bottom-2 -right-2 bg-red-500 text-white font-bold px-2 py-1 rounded-full text-xs shadow-md border-2 border-white">${score}%</span></div>`;
+                } else {
+                    iconHtml = `<i data-lucide="thumbs-up" class="w-24 h-24 text-slate-400 fill-slate-100 animate-bounce"></i>`;
+                }
+            }
+
+            let html = `
+            <div class="min-h-screen bg-slate-50 flex items-center justify-center p-4 w-full">
+                <div class="max-w-md w-full bg-white rounded-3xl p-8 text-center shadow-xl border-4 border-yellow-200 relative overflow-hidden">
+                    <div class="mb-6 flex justify-center relative z-10">
+                        ${iconHtml}
+                    </div>
+                    
+                    ${isPass 
+                        ? `<h2 class="text-4xl font-black text-yellow-500 mb-2 drop-shadow-sm">Great!!</h2>` 
+                        : `<h2 class="text-3xl font-bold text-slate-800 mb-2">Good Job!</h2>`
+                    }
+                    
+                    <p class="text-lg text-slate-600 font-bold mb-6">
+                        「${catLabel}」<br/>
+                        ${correctCount}問 せいかい！
+                    </p>
+
+                    ${isPass && !canGetStamp && !gameState.isChallengeMode ? `
+                    <div class="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 mb-6 animate-in zoom-in">
+                        <div class="flex items-center justify-center gap-2 text-yellow-600 font-bold mb-1">
+                            <i data-lucide="sparkles" class="w-5 h-5"></i><span>ごうかく！</span><i data-lucide="sparkles" class="w-5 h-5"></i>
+                        </div>
+                        <p class="text-slate-700 font-bold">よくがんばったね🏅</p>
+                        <p class="text-sm text-slate-500 font-bold mt-2">あと ${remaining}かいで<br/>スタンプ ゲット！</p>
+                    </div>` : ''}
+
+                    ${canGetStamp ? `
+                    <div class="mb-6 animate-in zoom-in duration-500">
+                        <button onclick="updateScreen('stampSelect'); playTone('tap')" class="w-full py-4 bg-yellow-400 text-white rounded-2xl font-black text-xl shadow-lg border-b-4 border-yellow-600 active:border-b-0 active:translate-y-1 animate-pulse">
+                            スタンプを えらぶ！
+                        </button>
+                    </div>` : `
+                    <div class="flex flex-col gap-3 relative z-10">
+                        ${!gameState.isChallengeMode ? 
+                        `<button onclick="startCategory('${catId}')" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-bold text-lg hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="refresh-ccw" class="w-5 h-5"></i> もういちど やる
+                        </button>` : ''}
+                        <button onclick="updateScreen('home'); playTone('tap')" class="w-full py-4 rounded-xl bg-slate-200 text-slate-700 font-bold text-lg hover:bg-slate-300 transition-colors flex items-center justify-center gap-2">
+                            <i data-lucide="home" class="w-5 h-5"></i> メニューへ もどる
+                        </button>
+                    </div>`}
+                </div>
+            </div>`;
+            app.innerHTML = html;
         }
         function renderStampSelect() {
             const cat = DATA[gameState.currentCategory];
             let html = `<div class="min-h-screen bg-slate-50 p-4 flex items-center justify-center w-full"><div class="max-w-md w-full bg-white rounded-3xl p-6 shadow-xl border-4 border-yellow-200"><div class="text-center mb-6"><div class="inline-block p-3 rounded-full bg-yellow-100 text-yellow-500 mb-4 animate-bounce"><i data-lucide="crown" class="w-10 h-10"></i></div><h2 class="text-2xl font-bold text-slate-800">スタンプゲット！</h2><p class="text-slate-500 font-bold mt-2 text-sm">スタンプを えらんでね！</p></div><div class="grid grid-cols-5 gap-3 max-h-80 overflow-y-auto p-2">${STAMP_OPTIONS.map(s => `<button onclick="getStamp('${s}')" class="aspect-square text-3xl flex items-center justify-center rounded-xl hover:bg-yellow-50 hover:scale-110 transition-all cursor-pointer border-2 border-transparent hover:border-yellow-300">${s}</button>`).join('')}</div></div></div>`; app.innerHTML = html;
         }
 
+        function getButtonColor(val) {
+            const map = {
+                'a': { border: 'border-red-500', hover: 'hover:bg-red-50', text: 'text-red-600' },
+                'e': { border: 'border-blue-500', hover: 'hover:bg-blue-50', text: 'text-blue-600' },
+                'i': { border: 'border-green-500', hover: 'hover:bg-green-50', text: 'text-green-600' },
+                'o': { border: 'border-orange-500', hover: 'hover:bg-orange-50', text: 'text-orange-600' },
+                'u': { border: 'border-purple-500', hover: 'hover:bg-purple-50', text: 'text-purple-600' },
+                's': { border: 'border-indigo-500', hover: 'hover:bg-indigo-50', text: 'text-indigo-600' },
+                't': { border: 'border-pink-500', hover: 'hover:bg-pink-50', text: 'text-pink-600' },
+                'c': { border: 'border-yellow-500', hover: 'hover:bg-yellow-50', text: 'text-yellow-600' },
+                'w': { border: 'border-teal-500', hover: 'hover:bg-teal-50', text: 'text-teal-600' },
+                'h': { border: 'border-slate-500', hover: 'hover:bg-slate-50', text: 'text-slate-600' },
+                'k': { border: 'border-lime-500', hover: 'hover:bg-lime-50', text: 'text-lime-600' },
+                'n': { border: 'border-emerald-500', hover: 'hover:bg-emerald-50', text: 'text-emerald-600' },
+                'y': { border: 'border-sky-500', hover: 'hover:bg-sky-50', text: 'text-sky-600' },
+                'p': { border: 'border-fuchsia-500', hover: 'hover:bg-fuchsia-50', text: 'text-fuchsia-600' },
+                'r': { border: 'border-amber-500', hover: 'hover:bg-amber-50', text: 'text-amber-600' },
+                'l': { border: 'border-cyan-500', hover: 'hover:bg-cyan-50', text: 'text-cyan-600' },
+                'm': { border: 'border-rose-500', hover: 'hover:bg-rose-50', text: 'text-rose-600' },
+                'sh': { border: 'border-green-500', hover: 'hover:bg-green-50', text: 'text-green-600' },
+                'ch': { border: 'border-green-500', hover: 'hover:bg-green-50', text: 'text-green-600' },
+                'th': { border: 'border-green-500', hover: 'hover:bg-green-50', text: 'text-green-600' },
+                'wh': { border: 'border-green-500', hover: 'hover:bg-green-50', text: 'text-green-600' },
+                'ng': { border: 'border-emerald-500', hover: 'hover:bg-emerald-50', text: 'text-emerald-600' },
+                'ck': { border: 'border-emerald-500', hover: 'hover:bg-emerald-50', text: 'text-emerald-600' },
+                'ph': { border: 'border-emerald-500', hover: 'hover:bg-emerald-50', text: 'text-emerald-600' },
+                'wr': { border: 'border-emerald-500', hover: 'hover:bg-emerald-50', text: 'text-emerald-600' },
+                'kn': { border: 'border-emerald-500', hover: 'hover:bg-emerald-50', text: 'text-emerald-600' },
+                'ou': { border: 'border-sky-500', hover: 'hover:bg-sky-50', text: 'text-sky-600' },
+                'ow': { border: 'border-sky-500', hover: 'hover:bg-sky-50', text: 'text-sky-600' },
+                'au': { border: 'border-sky-500', hover: 'hover:bg-sky-50', text: 'text-sky-600' },
+                'aw': { border: 'border-sky-500', hover: 'hover:bg-sky-50', text: 'text-sky-600' },
+                'oi': { border: 'border-indigo-500', hover: 'hover:bg-indigo-50', text: 'text-indigo-600' },
+                'oy': { border: 'border-indigo-500', hover: 'hover:bg-indigo-50', text: 'text-indigo-600' },
+                'oo': { border: 'border-indigo-500', hover: 'hover:bg-indigo-50', text: 'text-indigo-600' },
+                'ew': { border: 'border-indigo-500', hover: 'hover:bg-indigo-50', text: 'text-indigo-600' }
+            };
+            return map[val] || { border: 'border-gray-400', hover: 'hover:bg-gray-100', text: 'text-gray-700' };
+        }
+
         initData();
         render();
     </script>
 </body>
-
 </html>
+
+
+ 
