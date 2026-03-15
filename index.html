@@ -113,6 +113,25 @@
             overflow: hidden;
         }
 
+       @keyframes glint {
+            0% { transform: translateX(-100%) skewX(-20deg); opacity: 0; }
+            5% { opacity: 1; }
+            20% { transform: translateX(300%) skewX(-20deg); opacity: 0; }
+            100% { transform: translateX(300%) skewX(-20deg); opacity: 0; }
+        }
+        .animate-glint {
+            position: relative;
+            overflow: hidden;
+        }
+        .animate-glint::after {
+            content: '';
+            position: absolute;
+            top: 0; left: 0; width: 30%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.8) 50%, rgba(255,255,255,0) 100%);
+            animation: glint 3s infinite;
+            pointer-events: none;
+        } 
+
         /* モーダルアニメーション */
         @keyframes modal-in {
             from { opacity: 0; transform: scale(0.95) translateY(10px); }
@@ -151,7 +170,7 @@
                 <div class="inline-block p-3 rounded-full bg-indigo-100 text-indigo-500 mb-2">
                     <i data-lucide="book-open" class="w-8 h-8"></i>
                 </div>
-                <h2 class="text-2xl font-bold text-slate-700">あそびかた</h2>
+                <h2 class="text-2xl font-bold text-slate-700">つかいかた</h2>
             </div>
             <div class="space-y-6">
                 <div class="bg-slate-50 p-4 rounded-xl border border-slate-100">
@@ -706,10 +725,27 @@
             updateScreen('stampBook');
         }
 
+        // ★追加：「つかいかた」を開いて記録する関数
+        function openHelp() {
+            const user = state.allUsersData[state.currentUserId];
+            user.hasReadHelp = true;
+            saveData();
+            render(); // アニメーションを消すために再描画
+            openModal('helpModal');
+            playTone('tap');
+        }
+
+        // ★修正：「ポイント」を開いて記録する関数
         function showTips(tipsKey) {
+            const user = state.allUsersData[state.currentUserId];
+            if (!user.readTips) user.readTips = {};
+            user.readTips[tipsKey] = true;
+            saveData();
+            
             const content = TIPS_CONTENT[tipsKey];
             if (content) {
                 document.getElementById('tipsContent').innerHTML = content;
+                render(); // アニメーションを消すために再描画
                 openModal('tipsModal');
                 playTone('tap');
             }
@@ -794,20 +830,27 @@
             if (gameState.phase !== 'question') return;
             
             const currentItem = gameState.quizItems[gameState.questionIndex];
-            const cat = DATA[gameState.currentCategory]; // チャレンジモードの場合は動的データ
+            const cat = DATA[gameState.currentCategory];
             gameState.userAnswer = ans;
             
-            let isCorrect = false;
-
-            // --- 【修正ここから】 ---
+            // ★追加：チャレンジモードのときは本来の mode を逆引きする
+            let currentMode = cat.mode;
+            if (gameState.isChallengeMode) {
+                for (const catData of Object.values(DATA)) {
+                    if (catData.id === 'challenge') continue;
+                    if (catData.items.some(x => x.w === currentItem.w)) {
+                        currentMode = catData.mode;
+                        break;
+                    }
+                }
+            }
             
-            // モードごとの正解判定
-            // チャレンジモード(mixed) または フレームモードの場合は .ans を正解とする
-            if (cat.mode === 'mixed' || (cat.mode && cat.mode.includes('frame'))) {
+            let isCorrect = false;
+            
+            // ★修正：currentMode を使って正解判定を行う
+            if (currentMode && currentMode.includes('frame')) {
                 isCorrect = (ans === currentItem.ans);
             } else {
-                // それ以外（通常モードのCVCなど）
-                // データ定義の .v と比較
                 isCorrect = (ans === currentItem.v);
             }
             
@@ -815,24 +858,20 @@
                 playTone('correct');
                 gameState.correctCount++;
                 
-                // ★チャレンジモードなら、正解した単語を「克服リスト」から削除
                 if (gameState.isChallengeMode) {
                     const user = state.allUsersData[state.currentUserId];
-                    // w (単語) が一致するものを削除
                     user.challengeWords = user.challengeWords.filter(w => w.w !== currentItem.w);
                     saveData();
                 }
 
             } else {
                 playTone('error');
-                // 間違えた問題を記録
                 gameState.wrongAnswers.push(currentItem);
             }
             
             gameState.phase = 'feedback';
-            render(); // 画面更新（アニメーション表示）
+            render();
             
-            // 少し遅れて発音
             setTimeout(() => { speak(currentItem.w); }, 300);
         }
 
@@ -862,31 +901,30 @@
             const total = gameState.quizItems.length;
             const score = Math.round((gameState.correctCount / total) * 100);
             
-            // ★合格ラインを90点に変更
+            // ★変更：合格ライン(90点)と、満点(100点)の判定を分ける
             const isPass = (score >= 90); 
+            const isPerfect = (score === 100);
             
-            if (isPass) {
+            if (isPerfect) {
                 playTone('perfect');
+            } else if (isPass) {
+                playTone('complete'); // 90点台の音（任意で変更可能）
             } else {
-                playTone('complete');
+                playTone('complete'); 
             }
 
             const now = new Date();
             const today = now.toLocaleDateString('ja-JP') + ' ' + now.toLocaleTimeString('ja-JP', {hour: '2-digit', minute:'2-digit'});
             const user = state.allUsersData[state.currentUserId];
             
-            // 履歴保存
             if (!gameState.isChallengeMode) {
                 user.history.unshift({ date: today, categoryId: gameState.currentCategory, isPass, score, correctCount: gameState.correctCount, total });
                 if (user.history.length > HISTORY_LIMIT) user.history = user.history.slice(0, HISTORY_LIMIT);
             }
 
-            // ★チャレンジリストへの追加（通常モードで間違えた場合）
             if (!gameState.isChallengeMode && gameState.wrongAnswers.length > 0) {
                 if (!user.challengeWords) user.challengeWords = [];
-                
                 gameState.wrongAnswers.forEach(wrongItem => {
-                    // 重複チェック
                     const exists = user.challengeWords.some(item => item.w === wrongItem.w);
                     if (!exists) {
                         user.challengeWords.push(wrongItem);
@@ -895,29 +933,41 @@
             }
 
             let canGetStamp = false;
+            let gotExtraBadge = false; // ★追加：バッジが増えたかどうかのフラグ
             const catId = gameState.currentCategory;
 
-            // スタンプ判定（通常モードかつ合格時）
-            if (!gameState.isChallengeMode && isPass) {
-                if (!user.progress[catId]) user.progress[catId] = { perfectCount: 0, stamp: null };
+            // ★変更：バッジ追加のロジックを組み込む
+            if (!gameState.isChallengeMode) {
+                // 古いデータへの対応（extraBadgeCountを初期化）
+                if (!user.progress[catId]) user.progress[catId] = { perfectCount: 0, stamp: null, extraBadgeCount: 0 };
+                if (user.progress[catId].extraBadgeCount === undefined) user.progress[catId].extraBadgeCount = 0;
                 
-                // まだスタンプを持っていない場合
                 if (!user.progress[catId].stamp) {
-                    user.progress[catId].perfectCount += 1;
-                    if (user.progress[catId].perfectCount >= 3) {
-                        canGetStamp = true;
-                        setTimeout(() => playTone('crown'), 1500); 
+                    // まだスタンプがない場合
+                    if (isPass) {
+                        user.progress[catId].perfectCount += 1;
+                        if (user.progress[catId].perfectCount >= 3) {
+                            canGetStamp = true;
+                            setTimeout(() => playTone('crown'), 1500); 
+                        }
+                    }
+                } else {
+                    const MAX_EXTRA_BADGES = 4;
+                    if (isPerfect && user.progress[catId].extraBadgeCount < MAX_EXTRA_BADGES) {
+                        user.progress[catId].extraBadgeCount += 1;
+                        gotExtraBadge = true;
+                        setTimeout(() => playTone('crown'), 500); 
                     }
                 }
             } else {
-                // 不合格でもプログレスデータは作っておく
-                if (!gameState.isChallengeMode && !user.progress[catId]) {
-                    user.progress[catId] = { perfectCount: 0, stamp: null };
+                if (!user.progress[catId]) {
+                    user.progress[catId] = { perfectCount: 0, stamp: null, extraBadgeCount: 0 };
                 }
             }
             
             saveData();
-            state.resultInfo = { isPass, canGetStamp, score, correctCount: gameState.correctCount, total };
+            // ★変更：gotExtraBadge をリザルト画面に渡す
+            state.resultInfo = { isPass, canGetStamp, score, correctCount: gameState.correctCount, total, gotExtraBadge };
             updateScreen('result');
         }
 
@@ -1139,15 +1189,19 @@
         }
 
         function renderHome(user, progress, challengeWords) {
+            const userData = state.allUsersData[state.currentUserId];
+            // ★変更：履歴が0件、かつ「つかいかた」をまだ見ていない場合のみアニメーション
+            const isFirstTime = (!userData.history || userData.history.length === 0) && !userData.hasReadHelp;
+
             let html = `
-            <div class="min-h-screen bg-slate-50 p-4 w-full">
+            <div class="min-h-screen bg-slate-50 p-4 w-full relative">
                 <div class="max-w-md mx-auto pt-2">
                     <div class="flex justify-between items-center mb-6">
                         <button onclick="updateScreen('userSelect'); playTone('tap')" class="flex items-center gap-2 px-3 py-2 bg-white rounded-full text-slate-500 font-bold shadow-sm hover:bg-slate-100 border border-slate-100">
                             <i data-lucide="arrow-left" class="w-5 h-5"></i> <span class="text-xs">もどる</span>
                         </button>
                         
-                        <button onclick="openModal('helpModal'); playTone('tap')" class="flex items-center gap-1 px-3 py-2 bg-indigo-50 rounded-full text-indigo-600 font-bold shadow-sm hover:bg-indigo-100 border border-indigo-100">
+                        <button onclick="openHelp()" class="flex items-center gap-1 px-3 py-2 rounded-full font-bold shadow-sm transition-all ${isFirstTime ? 'bg-yellow-400 text-white border border-yellow-500 animate-bounce ring-4 ring-yellow-400/50' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100 border border-indigo-100'}">
                             <i data-lucide="help-circle" class="w-4 h-4"></i> <span class="text-xs">つかいかた</span>
                         </button>
 
@@ -1195,6 +1249,10 @@
                     <div class="space-y-8 mb-12">`;
 
             CATEGORY_GROUPS.forEach(group => {
+                // ★追加：このカテゴリのポイントを既に読んだかチェック
+                const readTips = userData.readTips || {};
+                const hasReadTips = readTips[group.tipsKey];
+
                 html += `
                 <div class="bg-white rounded-3xl shadow-sm border border-slate-100 p-4 relative overflow-hidden">
                     <div class="flex flex-col gap-1 mb-4 relative z-10">
@@ -1202,7 +1260,7 @@
                             <span class="text-lg font-bold ${group.color} flex items-center gap-2">
                                 <i data-lucide="check-circle" class="w-5 h-5"></i> ${group.title}
                             </span>
-                            <button onclick="showTips('${group.tipsKey}')" class="flex items-center gap-1 bg-yellow-400 text-white text-xs font-bold px-3 py-1.5 rounded-full hover:bg-yellow-500 transition-colors shadow-sm active:translate-y-0.5">
+                            <button onclick="showTips('${group.tipsKey}')" class="flex items-center gap-1 bg-yellow-400 text-white text-xs font-bold px-3 py-1.5 rounded-full hover:bg-yellow-500 transition-colors shadow-sm active:translate-y-0.5 ${hasReadTips ? '' : 'animate-glint'}">
                                 <i data-lucide="lightbulb" class="w-3 h-3"></i> ポイント
                             </button>
                         </div>
@@ -1214,8 +1272,20 @@
                     const cat = DATA[catId];
                     if (!cat) return;
                     
-                    const p = progress[cat.id] || { perfectCount: 0, stamp: null };
+                    const p = progress[cat.id] || { perfectCount: 0, stamp: null, extraBadgeCount: 0 };
                     const remainingForCrown = Math.max(0, 3 - p.perfectCount);
+                    
+                    // ★修正：固定の「👑」をカウント分だけつなげ、改行を防ぐクラスを適用する
+                    let badgesHtml = '';
+                    if (p.stamp) {
+                        const totalCrowns = 1 + (p.extraBadgeCount || 0);
+                        let crowns = '';
+                        for (let i = 0; i < totalCrowns; i++) {
+                            crowns += '👑';
+                        }
+                        // text-baseで少し小さく、tracking-tighterで隙間を詰め、whitespace-nowrapで途中の改行を防ぐ
+                        badgesHtml = `<span class="text-base animate-shine drop-shadow-sm ml-1 tracking-tighter whitespace-nowrap">${crowns}</span>`;
+                    }
                     
                     html += `
                     <button onclick="startCategory('${cat.id}')" class="relative w-full p-4 rounded-2xl shadow-sm hover:shadow-md transition-all transform hover:-translate-y-1 text-left bg-gradient-to-br ${cat.color} text-white group overflow-hidden h-full border-b-4 border-black/10 active:border-b-0 active:translate-y-1">
@@ -1226,8 +1296,7 @@
                             <div class="flex-1 min-w-0 mb-2">
                                 <span class="text-lg font-bold flex flex-wrap items-center gap-1 leading-tight drop-shadow-sm">
                                     ${cat.label}
-                                    ${p.stamp ? `<span class="text-xl animate-shine drop-shadow-sm ml-1">👑</span>` : ''}
-                                </span>
+                                    ${badgesHtml} </span>
                             </div>
                             <div class="w-full flex justify-between items-end">
                                 <div class="text-[10px] bg-black/20 px-2 py-1 rounded-full whitespace-nowrap font-bold shadow-sm backdrop-blur-sm">
@@ -1376,23 +1445,33 @@
         }
 
         // ゲーム画面
+        // ゲーム画面
         function renderGame(currentUser) {
             const cat = DATA[gameState.currentCategory];
             const currentItem = gameState.quizItems[gameState.questionIndex];
             const progressPercent = ((gameState.questionIndex) / gameState.quizItems.length) * 100;
             const isPhaseQuestion = gameState.phase === 'question';
             
+            // ★追加：チャレンジモードのときは本来の mode を逆引きする
+            let currentMode = cat.mode;
+            if (gameState.isChallengeMode) {
+                for (const catData of Object.values(DATA)) {
+                    if (catData.id === 'challenge') continue;
+                    if (catData.items.some(x => x.w === currentItem.w)) {
+                        currentMode = catData.mode;
+                        break;
+                    }
+                }
+            }
+
             // -----------------------------
             // ボックス生成ロジック (Frame対応)
             // -----------------------------
             let boxes = [];
             const parts = [currentItem.c1, currentItem.center, currentItem.c2];
-            
-            // スタイル定義
             const boxBaseClass = "letter-box w-16 h-20 text-5xl shadow-sm mx-0.5 rounded-2xl flex items-center justify-center leading-none pb-2"; 
             const frameBaseClass = "flex items-center justify-center p-2 rounded-3xl mx-1 gap-1 shadow-sm";
 
-            // アニメーション決定
             let animationClass = 'animate-spin-in'; 
             if (!isPhaseQuestion) {
                 if (currentItem.j.includes('pongo-effect')) animationClass = 'pongo-effect';
@@ -1402,14 +1481,13 @@
                 else animationClass = 'nobi-effect';
             }
 
-            // 特殊モード（フレーム表示）の判定フラグ
-            // データ定義の mode プロパティで判断
+            // ★修正：cat.mode ではなく currentMode で判定する
             let useFrameMode = false;
-            let frameType = ''; // 'blends_1', 'blends_2', 'digraph_v1' など
+            let frameType = ''; 
 
-            if (cat.mode && cat.mode.includes('frame')) {
+            if (currentMode && currentMode.includes('frame')) {
                 useFrameMode = true;
-                frameType = cat.mode;
+                frameType = currentMode;
             }
 
             for(let i=0; i<3; i++) {
@@ -1502,34 +1580,30 @@
             let gridCols = 'grid-cols-5';
             let buttonTextSize = 'text-4xl';
 
-            if (gameState.isChallengeMode) {
-                // チャレンジモードの場合、汎用的なボタンセットを表示
-                // ※キーボード入力も可能
-                choices = ['a', 'e', 'i', 'o', 'u'];
-                gridCols = 'grid-cols-5';
-            } else if (cat.mode === 'digraph_c1') {
+            // ★修正：isChallengeMode の分岐を消し、全て currentMode で判定させる
+            if (currentMode === 'digraph_c1') {
                 choices = ['sh', 'ch', 'th', 'wh']; 
                 gridCols = 'grid-cols-4'; 
                 buttonTextSize = 'text-3xl'; 
-            } else if (cat.mode === 'digraph_c2') {
+            } else if (currentMode === 'digraph_c2') {
                 choices = ['ng', 'ck', 'ph', 'wr', 'kn']; 
                 gridCols = 'grid-cols-5';
                 buttonTextSize = 'text-3xl';
-            } else if (cat.mode === 'digraph_v2') {
+            } else if (currentMode === 'digraph_v2') {
                 choices = ['ou', 'ow', 'au', 'aw'];
                 gridCols = 'grid-cols-2';
                 buttonTextSize = 'text-3xl';
-            } else if (cat.mode === 'digraph_v3') {
+            } else if (currentMode === 'digraph_v3') {
                 choices = ['oi', 'oy', 'oo', 'ew'];
                 gridCols = 'grid-cols-2';
                 buttonTextSize = 'text-3xl';
-            } else if (cat.mode === 'digraph_v1_frame') {
+            } else if (currentMode === 'digraph_v1_frame') {
                 choices = ['a', 'e', 'i', 'o', 'u'];
                 gridCols = 'grid-cols-5';
-            } else if (cat.mode === 'blends_1_frame') {
+            } else if (currentMode === 'blends_1_frame') {
                 choices = ['l', 'r'];
                 gridCols = 'grid-cols-2';
-            } else if (cat.mode === 'blends_2_frame') {
+            } else if (currentMode === 'blends_2_frame') {
                 choices = ['c', 'k', 'l', 'm', 'n', 'p', 't', 'w'];
                 gridCols = 'grid-cols-4';
                 buttonTextSize = 'text-3xl';
